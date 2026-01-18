@@ -10,7 +10,13 @@ import uploadRoutes from "./routes/upload.js";
 import importRoutes from "./routes/import.js";
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: ["https://trading-journal-livermore.vercel.app"],
+    credentials: true,
+  }),
+);
+
 app.use(express.json());
 
 app.use("/trades", tradeRoutes);
