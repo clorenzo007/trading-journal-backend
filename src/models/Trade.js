@@ -3,7 +3,12 @@ import mongoose from "mongoose";
 const TradeSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-
+    account: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Account",
+      required: true,
+    }
+    
     // Identidad
     symbol: { type: String, required: true },
     strategy_type: { type: String, required: true },
