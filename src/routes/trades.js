@@ -14,6 +14,7 @@ import {
 
 import { protect } from "../middleware/auth.js";
 import upload from "../middleware/upload.js";
+import { requireActiveAccount } from "../middleware/activeAccount.js";
 
 const router = express.Router();
 

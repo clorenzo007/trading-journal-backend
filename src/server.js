@@ -6,6 +6,8 @@ import { connectDB } from "./config/db.js";
 import tradeRoutes from "./routes/trades.js";
 import authRoutes from "./routes/auth.js";
 import importRoutes from "./routes/import.js";
+import accountRoutes from "./routes/accounts.js";
+
 dotenv.config();
 
 const app = express();
@@ -27,6 +29,7 @@ app.use(express.json());
 app.use("/trades", tradeRoutes);
 app.use("/auth", authRoutes);
 app.use("/import", importRoutes);
+app.use("/accounts", accountRoutes);
 
 // ===== HEALTH =====
 app.get("/", (req, res) => {

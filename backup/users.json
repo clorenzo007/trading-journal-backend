@@ -1,0 +1,10 @@
+[
+  {
+    "_id": "696e039d3b62cf2b6c6fcb9a",
+    "email": "test@test.com",
+    "password": "$2b$10$wGBvJZyi/.VXHfbx/IqcjOIeiU7c7pfd6XhmUWJUAll53r4ilQrZq",
+    "createdAt": "2026-01-19T10:12:45.075Z",
+    "updatedAt": "2026-01-19T10:12:45.075Z",
+    "__v": 0
+  }
+]

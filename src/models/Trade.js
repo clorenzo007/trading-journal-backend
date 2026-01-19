@@ -7,8 +7,9 @@ const TradeSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Account",
       required: true,
-    }
-    
+      index: true,
+    },
+
     // Identidad
     symbol: { type: String, required: true },
     strategy_type: { type: String, required: true },
@@ -75,7 +76,7 @@ const TradeSchema = new mongoose.Schema(
     external_id: { type: String, index: true },
     source: { type: String, default: "manual" },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.model("Trade", TradeSchema);
