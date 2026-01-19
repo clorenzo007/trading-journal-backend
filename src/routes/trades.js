@@ -8,8 +8,6 @@ import {
   reviewTrade,
   uploadEntryImage,
   uploadReviewImage,
-  deleteEntryImage,
-  deleteReviewImage,
 } from "../controllers/tradeController.js";
 
 import { protect } from "../middleware/auth.js";
