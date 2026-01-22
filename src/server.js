@@ -3,10 +3,12 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 import { connectDB } from "./config/db.js";
+
 import tradeRoutes from "./routes/trades.js";
 import authRoutes from "./routes/auth.js";
 import importRoutes from "./routes/import.js";
 import accountRoutes from "./routes/accounts.js";
+import uploadRoutes from "./routes/upload.js";
 
 dotenv.config();
 
@@ -23,6 +25,7 @@ app.use(
   }),
 );
 
+// ===== BODY =====
 app.use(express.json());
 
 // ===== ROUTES =====
@@ -30,6 +33,7 @@ app.use("/trades", tradeRoutes);
 app.use("/auth", authRoutes);
 app.use("/import", importRoutes);
 app.use("/accounts", accountRoutes);
+app.use("/", uploadRoutes); // ← IMPORTANTE: rutas de imágenes
 
 // ===== HEALTH =====
 app.get("/", (req, res) => {

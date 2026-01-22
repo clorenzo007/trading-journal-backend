@@ -1,104 +1,128 @@
 import Trade from "../models/Trade.js";
 import cloudinary from "../config/cloudinary.js";
 
-export async function uploadEntryImage(req, res) {
+// ==========================
+// SUBIR IMAGEN DE ENTRADA
+// ==========================
+export const uploadEntryImage = async (req, res) => {
   try {
-    const trade = await Trade.findOne({
-      _id: req.params.id,
-      user: req.user._id,
-      account: req.account._id,
-    });
+    const { id } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const trade = await Trade.findById(id);
 
     if (!trade) {
       return res.status(404).json({ error: "Trade not found" });
     }
 
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: "trades/entry",
-    });
+    // Si ya había imagen, borrar la anterior
+    if (trade.entryImage?.public_id) {
+      await cloudinary.uploader.destroy(trade.entryImage.public_id);
+    }
 
     trade.entryImage = {
-      url: result.secure_url,
-      public_id: result.public_id,
+      url: req.file.path,
+      public_id: req.file.filename,
     };
 
     await trade.save();
-    res.json(trade);
-  } catch (err) {
-    console.error("UPLOAD ENTRY IMAGE ERROR:", err);
-    res.status(500).json({ error: "Upload failed" });
-  }
-}
 
-export async function uploadReviewImage(req, res) {
+    res.json(trade.entryImage);
+  } catch (error) {
+    console.error("UPLOAD ENTRY IMAGE ERROR:", error);
+    res.status(500).json({ error: "Failed to upload entry image" });
+  }
+};
+
+// ==========================
+// SUBIR IMAGEN DE REVIEW
+// ==========================
+export const uploadReviewImage = async (req, res) => {
   try {
-    const trade = await Trade.findOne({
-      _id: req.params.id,
-      user: req.user._id,
-      account: req.account._id,
-    });
+    const { id } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const trade = await Trade.findById(id);
 
     if (!trade) {
       return res.status(404).json({ error: "Trade not found" });
     }
 
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: "trades/review",
-    });
+    // Si ya había imagen, borrar la anterior
+    if (trade.reviewImage?.public_id) {
+      await cloudinary.uploader.destroy(trade.reviewImage.public_id);
+    }
 
     trade.reviewImage = {
-      url: result.secure_url,
-      public_id: result.public_id,
+      url: req.file.path,
+      public_id: req.file.filename,
     };
 
     await trade.save();
-    res.json(trade);
-  } catch (err) {
-    console.error("UPLOAD REVIEW IMAGE ERROR:", err);
-    res.status(500).json({ error: "Upload failed" });
+
+    res.json(trade.reviewImage);
+  } catch (error) {
+    console.error("UPLOAD REVIEW IMAGE ERROR:", error);
+    res.status(500).json({ error: "Failed to upload review image" });
   }
-}
+};
 
-export async function deleteEntryImage(req, res) {
+// ==========================
+// BORRAR IMAGEN DE ENTRADA
+// ==========================
+export const deleteEntryImage = async (req, res) => {
   try {
-    const trade = await Trade.findOne({
-      _id: req.params.id,
-      user: req.user._id,
-      account: req.account._id,
-    });
+    const { id } = req.params;
 
-    if (!trade?.entryImage?.public_id) {
-      return res.status(404).json({ error: "Image not found" });
+    const trade = await Trade.findById(id);
+
+    if (!trade) {
+      return res.status(404).json({ error: "Trade not found" });
     }
 
-    await cloudinary.uploader.destroy(trade.entryImage.public_id);
+    if (trade.entryImage?.public_id) {
+      await cloudinary.uploader.destroy(trade.entryImage.public_id);
+    }
+
     trade.entryImage = undefined;
     await trade.save();
 
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: "Delete failed" });
+  } catch (error) {
+    console.error("DELETE ENTRY IMAGE ERROR:", error);
+    res.status(500).json({ error: "Failed to delete entry image" });
   }
-}
+};
 
-export async function deleteReviewImage(req, res) {
+// ==========================
+// BORRAR IMAGEN DE REVIEW
+// ==========================
+export const deleteReviewImage = async (req, res) => {
   try {
-    const trade = await Trade.findOne({
-      _id: req.params.id,
-      user: req.user._id,
-      account: req.account._id,
-    });
+    const { id } = req.params;
 
-    if (!trade?.reviewImage?.public_id) {
-      return res.status(404).json({ error: "Image not found" });
+    const trade = await Trade.findById(id);
+
+    if (!trade) {
+      return res.status(404).json({ error: "Trade not found" });
     }
 
-    await cloudinary.uploader.destroy(trade.reviewImage.public_id);
+    if (trade.reviewImage?.public_id) {
+      await cloudinary.uploader.destroy(trade.reviewImage.public_id);
+    }
+
     trade.reviewImage = undefined;
     await trade.save();
 
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: "Delete failed" });
+  } catch (error) {
+    console.error("DELETE REVIEW IMAGE ERROR:", error);
+    res.status(500).json({ error: "Failed to delete review image" });
   }
-}
+};

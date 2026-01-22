@@ -1,30 +1,39 @@
 import express from "express";
+import {
+  uploadEntryImage,
+  uploadReviewImage,
+  deleteEntryImage,
+  deleteReviewImage,
+} from "../controllers/tradeImagesController.js";
+
+import { protect } from "../middleware/auth.js";
+import { requireActiveAccount } from "../middleware/activeAccount.js";
 import upload from "../middleware/upload.js";
-import cloudinary from "../config/cloudinary.js";
 
 const router = express.Router();
 
-router.post("/", upload.single("image"), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded" });
-    }
+router.use(protect);
+router.use(requireActiveAccount);
 
-    const b64 = Buffer.from(req.file.buffer).toString("base64");
-    const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+// ==========================
+// SUBIDAS
+// ==========================
+router.post(
+  "/trades/:id/entry-image",
+  upload.single("image"),
+  uploadEntryImage,
+);
 
-    const result = await cloudinary.uploader.upload(dataURI, {
-      folder: "trades",
-    });
+router.post(
+  "/trades/:id/review-image",
+  upload.single("image"),
+  uploadReviewImage,
+);
 
-    res.json({
-      url: result.secure_url,
-      public_id: result.public_id,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Upload failed" });
-  }
-});
+// ==========================
+// BORRADOS
+// ==========================
+router.delete("/trades/:id/entry-image", deleteEntryImage);
+router.delete("/trades/:id/review-image", deleteReviewImage);
 
 export default router;
