@@ -25,6 +25,10 @@ export const protect = async (req, res, next) => {
       return res.status(401).json({ error: "Usuario no encontrado" });
     }
 
+    if (!user.active) {
+      return res.status(403).json({ error: "User disabled" });
+    }
+
     req.user = user;
     next();
   } catch (err) {

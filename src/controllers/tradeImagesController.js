@@ -2,19 +2,26 @@ import Trade from "../models/Trade.js";
 import cloudinary from "../config/cloudinary.js";
 
 async function uploadToCloudinary(file) {
+  if (!file) throw new Error("No file received");
+
   return new Promise((resolve, reject) => {
-    cloudinary.uploader
-      .upload_stream({ folder: "trades" }, (error, result) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: "trades" },
+      (error, result) => {
         if (error) reject(error);
         else resolve(result);
-      })
-      .end(file.buffer);
+      },
+    );
+
+    stream.end(file.buffer);
   });
 }
 
-// ================= ENTRY IMAGE =================
+// ================= ENTRY =================
 export const uploadEntryImage = async (req, res) => {
   try {
+    if (!req.file) return res.status(400).json({ error: "Image file missing" });
+
     const trade = await Trade.findOne({
       _id: req.params.id,
       user: req.user._id,
@@ -35,13 +42,15 @@ export const uploadEntryImage = async (req, res) => {
     res.json(trade);
   } catch (err) {
     console.error("ENTRY IMAGE ERROR:", err);
-    res.status(500).json({ error: "Upload failed" });
+    res.status(500).json({ error: err.message });
   }
 };
 
-// ================= REVIEW IMAGE =================
+// ================= REVIEW =================
 export const uploadReviewImage = async (req, res) => {
   try {
+    if (!req.file) return res.status(400).json({ error: "Image file missing" });
+
     const trade = await Trade.findOne({
       _id: req.params.id,
       user: req.user._id,
@@ -62,41 +71,6 @@ export const uploadReviewImage = async (req, res) => {
     res.json(trade);
   } catch (err) {
     console.error("REVIEW IMAGE ERROR:", err);
-    res.status(500).json({ error: "Upload failed" });
-  }
-};
-
-// ================= DELETE =================
-export const deleteEntryImage = async (req, res) => {
-  try {
-    const trade = await Trade.findById(req.params.id);
-    if (!trade?.entryImage?.public_id)
-      return res.status(404).json({ error: "No image" });
-
-    await cloudinary.uploader.destroy(trade.entryImage.public_id);
-
-    trade.entryImage = undefined;
-    await trade.save();
-
-    res.json(trade);
-  } catch (err) {
-    res.status(500).json({ error: "Delete failed" });
-  }
-};
-
-export const deleteReviewImage = async (req, res) => {
-  try {
-    const trade = await Trade.findById(req.params.id);
-    if (!trade?.reviewImage?.public_id)
-      return res.status(404).json({ error: "No image" });
-
-    await cloudinary.uploader.destroy(trade.reviewImage.public_id);
-
-    trade.reviewImage = undefined;
-    await trade.save();
-
-    res.json(trade);
-  } catch (err) {
-    res.status(500).json({ error: "Delete failed" });
+    res.status(500).json({ error: err.message });
   }
 };

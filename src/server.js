@@ -9,6 +9,7 @@ import authRoutes from "./routes/auth.js";
 import importRoutes from "./routes/import.js";
 import accountRoutes from "./routes/accounts.js";
 import uploadRoutes from "./routes/upload.js";
+import adminRoutes from "./routes/admin.js";
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use("/auth", authRoutes);
 app.use("/import", importRoutes);
 app.use("/accounts", accountRoutes);
 app.use("/", uploadRoutes); // ← IMPORTANTE: rutas de imágenes
+app.use("/admin", adminRoutes);
 
 // ===== HEALTH =====
 app.get("/", (req, res) => {

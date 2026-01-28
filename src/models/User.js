@@ -20,4 +20,14 @@ UserSchema.methods.comparePassword = async function (candidate) {
   return bcryptjs.compare(candidate, this.password);
 };
 
+role: {
+  type: String,
+  enum: ["admin", "user"],
+  default: "user",
+},
+active: {
+  type: Boolean,
+  default: true,
+},
+
 export default mongoose.model("User", UserSchema);
