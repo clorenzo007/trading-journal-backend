@@ -1,5 +1,4 @@
 import express from "express";
-import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./config/db.js";
 
@@ -14,25 +13,27 @@ dotenv.config();
 
 const app = express();
 
-// ================= DATABASE FIRST =================
+// ================= DATABASE =================
 await connectDB();
 
-// ================= CORS =================
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://trading-journal-livermore.vercel.app",
-];
+// ================= RAILWAY CORS FIX =================
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization, x-account-id",
+  );
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+  );
 
-app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "x-account-id"],
-  }),
-);
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
 
-app.options("*", cors());
+  next();
+});
 
 // ================= BODY =================
 app.use(express.json());
