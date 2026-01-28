@@ -16,15 +16,33 @@ dotenv.config();
 const app = express();
 
 // ===== CORS =====
+import cors from "cors";
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://trading-journal-livermore.vercel.app",
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://trading-journal-livermore.vercel.app",
-    ],
+    origin: function (origin, callback) {
+      // permitir requests sin origin (Postman, mobile apps)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS not allowed"));
+      }
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-account-id"],
   }),
 );
+
+// 🔴 MUY IMPORTANTE PARA PREFLIGHT
+app.options("*", cors());
 
 // ===== BODY =====
 app.use(express.json());
