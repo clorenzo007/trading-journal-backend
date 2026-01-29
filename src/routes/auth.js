@@ -1,27 +1,14 @@
-import jwt from "jsonwebtoken";
-import User from "../models/User.js";
+import express from "express";
+import { register, login, getMe } from "../controllers/authController.js";
+import { protect } from "../middleware/auth.js";
 
-export const protect = async (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
+const router = express.Router();
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "No token provided" });
-    }
+// PUBLIC
+router.post("/register", register);
+router.post("/login", login);
 
-    const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+// PRIVATE
+router.get("/me", protect, getMe);
 
-    const user = await User.findById(decoded.id).select("-password");
-
-    if (!user) return res.status(401).json({ message: "User not found" });
-    if (user.disabled)
-      return res.status(403).json({ message: "User disabled" });
-
-    req.user = user;
-    next();
-  } catch (err) {
-    console.error("AUTH ERROR:", err.message);
-    res.status(401).json({ message: "Invalid token" });
-  }
-};
+export default router; // 🚨 ESTO ES LO QUE FALTABA
