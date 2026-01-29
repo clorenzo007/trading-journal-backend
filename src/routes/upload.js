@@ -6,13 +6,14 @@ import {
   deleteReviewImage,
 } from "../controllers/tradeImagesController.js";
 
-import auth from "../middleware/auth.js"; // 👈 CAMBIO ACÁ
+import { protect } from "../middleware/auth.js"; // ✅ CORRECTO
 import { requireActiveAccount } from "../middleware/activeAccount.js";
 import upload from "../middleware/upload.js";
 
 const router = express.Router();
 
-router.use(auth);
+// 🔐 AUTH + ACCOUNT
+router.use(protect);
 router.use(requireActiveAccount);
 
 // ==========================

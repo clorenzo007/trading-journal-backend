@@ -1,9 +1,27 @@
-import express from "express";
-import { register, login } from "../controllers/authController.js";
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
-const router = express.Router();
+export const protect = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
 
-router.post("/register", register);
-router.post("/login", login);
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "No token provided" });
+    }
 
-export default router;
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await User.findById(decoded.id).select("-password");
+
+    if (!user) return res.status(401).json({ message: "User not found" });
+    if (user.disabled)
+      return res.status(403).json({ message: "User disabled" });
+
+    req.user = user;
+    next();
+  } catch (err) {
+    console.error("AUTH ERROR:", err.message);
+    res.status(401).json({ message: "Invalid token" });
+  }
+};
