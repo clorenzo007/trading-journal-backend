@@ -4,7 +4,8 @@ import {
   createAccount,
   deleteAccount,
 } from "../controllers/accountController.js";
-import auth from "../middleware/auth.js";
+
+import { auth } from "../middleware/auth.js"; // 👈 IMPORT NOMBRADO
 
 const router = express.Router();
 
