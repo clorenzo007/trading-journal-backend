@@ -5,12 +5,12 @@ import {
   deleteAccount,
 } from "../controllers/accountController.js";
 
-import auth from "../middleware/auth.js"; // 👈 IMPORT DEFAULT
+import { protect } from "../middleware/auth.js"; // ✅ IMPORT CORRECTO
 
 const router = express.Router();
 
-router.get("/", auth, getAccounts);
-router.post("/", auth, createAccount);
-router.delete("/:id", auth, deleteAccount);
+router.get("/", protect, getAccounts);
+router.post("/", protect, createAccount);
+router.delete("/:id", protect, deleteAccount);
 
 export default router;

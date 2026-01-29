@@ -1,22 +1,17 @@
 import express from "express";
+import { protect } from "../middleware/auth.js";
 import {
-  createTrade,
   getTrades,
-  getTradeById,
+  createTrade,
   updateTrade,
   deleteTrade,
 } from "../controllers/tradeController.js";
 
-import auth from "../middleware/auth.js"; // 👈 FIX
-import { requireActiveAccount } from "../middleware/activeAccount.js";
-
 const router = express.Router();
 
-router.use(auth);
-router.use(requireActiveAccount);
+router.use(protect);
 
 router.get("/", getTrades);
-router.get("/:id", getTradeById);
 router.post("/", createTrade);
 router.put("/:id", updateTrade);
 router.delete("/:id", deleteTrade);
