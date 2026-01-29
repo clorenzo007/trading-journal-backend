@@ -1,22 +1,36 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-export default async function auth(req, res, next) {
-  const header = req.headers.authorization;
+export const protect = async (req, res, next) => {
+  let token;
 
-  if (!header || !header.startsWith("Bearer "))
-    return res.status(401).json({ error: "No token" });
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  }
+
+  if (!token) {
+    return res.status(401).json({ error: "No autorizado, falta token" });
+  }
 
   try {
-    const token = header.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const user = await User.findById(decoded.id).select("-password");
-    if (!user) return res.status(401).json({ error: "User not found" });
 
-    req.user = user; // 👈 ahora trae role
+    if (!user) {
+      return res.status(401).json({ error: "Usuario no encontrado" });
+    }
+
+    if (user.active === false) {
+      return res.status(403).json({ error: "User disabled" });
+    }
+
+    req.user = user;
     next();
-  } catch {
-    res.status(401).json({ error: "Invalid token" });
+  } catch (err) {
+    return res.status(401).json({ error: "Token inválido" });
   }
-}
+};
