@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./config/db.js";
 
@@ -13,34 +14,37 @@ dotenv.config();
 
 const app = express();
 
-// ================= DATABASE =================
-await connectDB();
+// ================= CORS FIRST (CRITICAL) =================
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://trading-journal-livermore.vercel.app",
+];
 
-// ================= RAILWAY CORS FIX =================
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization, x-account-id",
-  );
-  res.header(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-  );
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-account-id"],
+  }),
+);
 
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-
-  next();
-});
+// handle preflight
+app.options("*", cors());
 
 // ================= BODY =================
 app.use(express.json());
 
+// ================= DB =================
+await connectDB();
+
 // ================= ROUTES =================
-app.use("/trades", tradeRoutes);
 app.use("/auth", authRoutes);
+app.use("/trades", tradeRoutes);
 app.use("/import", importRoutes);
 app.use("/accounts", accountRoutes);
 app.use("/admin", adminRoutes);
