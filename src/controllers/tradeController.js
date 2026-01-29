@@ -21,7 +21,11 @@ export const getTrades = async (req, res) => {
   try {
     const trades = await Trade.find({
       user: req.user._id,
-      account: req.account._id,
+      $or: [
+        { account: req.account._id }, // nuevos
+        { account: { $exists: false } }, // viejos
+        { account: null }, // por si acaso
+      ],
     }).sort({ entry_date: -1 });
 
     res.json(trades);
