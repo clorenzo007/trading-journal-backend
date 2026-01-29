@@ -6,17 +6,17 @@ import {
   deleteReviewImage,
 } from "../controllers/tradeImagesController.js";
 
-import { protect } from "../middleware/auth.js";
+import auth from "../middleware/auth.js"; // 👈 CAMBIO ACÁ
 import { requireActiveAccount } from "../middleware/activeAccount.js";
 import upload from "../middleware/upload.js";
 
 const router = express.Router();
 
-router.use(protect);
+router.use(auth);
 router.use(requireActiveAccount);
 
 // ==========================
-// SUBIDAS
+// UPLOADS
 // ==========================
 router.post(
   "/trades/:id/entry-image",
@@ -31,7 +31,7 @@ router.post(
 );
 
 // ==========================
-// BORRADOS
+// DELETES
 // ==========================
 router.delete("/trades/:id/entry-image", deleteEntryImage);
 router.delete("/trades/:id/review-image", deleteReviewImage);
