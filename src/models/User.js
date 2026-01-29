@@ -1,33 +1,43 @@
 import mongoose from "mongoose";
-import bcryptjs from "bcryptjs";
+import bcrypt from "bcryptjs";
 
-const UserSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+    },
+
+    role: {
+      type: String,
+      enum: ["admin", "user"], // ✅ ACA VA ENUM
+      default: "user",
+    },
   },
   { timestamps: true },
 );
 
-// ✅ Middleware correcto (sin next)
-UserSchema.pre("save", async function () {
-  if (!this.isModified("password")) return;
+// ================= HASH PASSWORD =================
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
 
-  this.password = await bcryptjs.hash(this.password, 10);
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
 });
 
-UserSchema.methods.comparePassword = async function (candidate) {
-  return bcryptjs.compare(candidate, this.password);
+// ================= COMPARE PASSWORD =================
+userSchema.methods.comparePassword = function (candidate) {
+  return bcrypt.compare(candidate, this.password);
 };
 
-role: {
-  type: String,
-  enum: ["admin", "user"],
-  default: "user",
-},
-active: {
-  type: Boolean,
-  default: true,
-},
-
-export default mongoose.model("User", UserSchema);
+export default mongoose.model("User", userSchema);
