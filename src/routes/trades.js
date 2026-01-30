@@ -1,7 +1,10 @@
 import express from "express";
-import { protect } from "../middleware/auth.js";
+import auth from "../middleware/auth.js"; // ✅ DEFAULT
+import { requireActiveAccount } from "../middleware/activeAccount.js";
+
 import {
   getTrades,
+  getTradeById,
   createTrade,
   updateTrade,
   deleteTrade,
@@ -9,9 +12,11 @@ import {
 
 const router = express.Router();
 
-router.use(protect);
+router.use(auth);
+router.use(requireActiveAccount);
 
 router.get("/", getTrades);
+router.get("/:id", getTradeById);
 router.post("/", createTrade);
 router.put("/:id", updateTrade);
 router.delete("/:id", deleteTrade);
