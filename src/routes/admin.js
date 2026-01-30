@@ -5,7 +5,7 @@ import { requireAdmin } from "../middleware/admin.js";
 
 const router = express.Router();
 
-router.use(protect);
+router.use(auth);
 router.use(requireAdmin);
 
 // listar usuarios

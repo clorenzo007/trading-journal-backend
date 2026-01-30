@@ -6,7 +6,7 @@ import upload from "../middleware/upload.js";
 
 const router = express.Router();
 
-router.use(protect);
+router.use(auth);
 router.use(requireActiveAccount);
 
 // Override opcional: ?account=ID (ya lo maneja requireActiveAccount)

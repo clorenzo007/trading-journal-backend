@@ -13,7 +13,7 @@ import upload from "../middleware/upload.js";
 const router = express.Router();
 
 // 🔐 AUTH + ACCOUNT
-router.use(protect);
+router.use(auth);
 router.use(requireActiveAccount);
 
 // ==========================
