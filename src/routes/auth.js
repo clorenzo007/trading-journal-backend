@@ -1,14 +1,15 @@
 import express from "express";
+import auth from "../middleware/auth.js"; // ✅ DEFAULT IMPORT
+
 import { register, login, getMe } from "../controllers/authController.js";
-import { protect } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// PUBLIC
+// Públicas
 router.post("/register", register);
 router.post("/login", login);
 
-// PRIVATE
-router.get("/me", protect, getMe);
+// Privada
+router.get("/me", auth, getMe);
 
-export default router; // 🚨 ESTO ES LO QUE FALTABA
+export default router;

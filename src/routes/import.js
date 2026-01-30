@@ -1,6 +1,6 @@
 import express from "express";
 import { importMT5 } from "../controllers/importController.js";
-import { protect } from "../middleware/auth.js";
+import auth from "../middleware/auth.js";
 import { requireActiveAccount } from "../middleware/activeAccount.js";
 import upload from "../middleware/upload.js";
 
