@@ -2,7 +2,6 @@ import express from "express";
 import {
   getAccounts,
   createAccount,
-  deleteAccount,
 } from "../controllers/accountController.js";
 import auth from "../middleware/auth.js";
 
