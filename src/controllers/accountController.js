@@ -1,4 +1,4 @@
-import TradingAccount from "../models/TradingAccounts.js";
+import TradingAccount from "../models/TradingAccount.js";
 
 // GET ACCOUNTS
 export async function getAccounts(req, res) {

@@ -1,4 +1,4 @@
-import TradingAccount from "../models/TradingAccounts.js";
+import TradingAccount from "../models/TradingAccount.js";
 
 export const requireActiveAccount = async (req, res, next) => {
   try {
