@@ -1,4 +1,4 @@
-import Account from "../models/Account.js";
+import TradingAccount from "../models/TradingAccounts.js";
 
 export const requireActiveAccount = async (req, res, next) => {
   try {
@@ -9,13 +9,13 @@ export const requireActiveAccount = async (req, res, next) => {
     let account;
 
     if (accountId) {
-      account = await Account.findOne({
+      account = await TradingAccount.findOne({
         _id: accountId,
         user: userId,
         status: "active",
       });
     } else {
-      account = await Account.findOne({
+      account = await TradingAccount.findOne({
         user: userId,
         status: "active",
       }).sort({ createdAt: 1 });

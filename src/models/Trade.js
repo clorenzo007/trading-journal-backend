@@ -5,7 +5,7 @@ const TradeSchema = new mongoose.Schema(
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     account: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Account",
+      ref: "TradingAccount",
       required: true,
       index: true,
     },

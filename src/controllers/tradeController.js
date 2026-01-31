@@ -1,12 +1,14 @@
 import Trade from "../models/Trade.js";
 
-// Crear trade
+// =======================
+// CREATE
+// =======================
 export const createTrade = async (req, res) => {
   try {
     const trade = await Trade.create({
       ...req.body,
       user: req.user._id,
-      account: req.account._id,
+      tradingAccount: req.tradingAccount._id, // ✅ nombre correcto
     });
 
     res.status(201).json(trade);
@@ -16,16 +18,14 @@ export const createTrade = async (req, res) => {
   }
 };
 
-// Listar trades (por cuenta activa)
+// =======================
+// GET ALL (cuenta activa)
+// =======================
 export const getTrades = async (req, res) => {
   try {
     const trades = await Trade.find({
       user: req.user._id,
-      $or: [
-        { account: req.account._id }, // nuevos
-        { account: { $exists: false } }, // viejos
-        { account: null }, // por si acaso
-      ],
+      tradingAccount: req.tradingAccount._id, // ✅
     }).sort({ entry_date: -1 });
 
     res.json(trades);
@@ -35,13 +35,15 @@ export const getTrades = async (req, res) => {
   }
 };
 
-// Obtener trade por ID
+// =======================
+// GET ONE
+// =======================
 export const getTradeById = async (req, res) => {
   try {
     const trade = await Trade.findOne({
       _id: req.params.id,
       user: req.user._id,
-      account: req.account._id,
+      tradingAccount: req.tradingAccount._id, // ✅
     });
 
     if (!trade) {
@@ -55,14 +57,16 @@ export const getTradeById = async (req, res) => {
   }
 };
 
-// Actualizar trade
+// =======================
+// UPDATE
+// =======================
 export const updateTrade = async (req, res) => {
   try {
     const trade = await Trade.findOneAndUpdate(
       {
         _id: req.params.id,
         user: req.user._id,
-        account: req.account._id,
+        tradingAccount: req.tradingAccount._id, // ✅
       },
       req.body,
       { new: true },
@@ -79,13 +83,15 @@ export const updateTrade = async (req, res) => {
   }
 };
 
-// Borrar trade
+// =======================
+// DELETE
+// =======================
 export const deleteTrade = async (req, res) => {
   try {
     const trade = await Trade.findOneAndDelete({
       _id: req.params.id,
       user: req.user._id,
-      account: req.account._id,
+      tradingAccount: req.tradingAccount._id, // ✅
     });
 
     if (!trade) {
