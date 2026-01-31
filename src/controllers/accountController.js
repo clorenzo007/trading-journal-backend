@@ -1,9 +1,9 @@
-import Account from "../models/Account.js";
+import TradingAccount from "../models/TradingAccounts.js";
 
 // GET ACCOUNTS
 export async function getAccounts(req, res) {
   try {
-    const accounts = await Account.find({ user: req.user._id });
+    const accounts = await TradingAccount.find({ user: req.user._id });
     res.json(accounts);
   } catch (err) {
     console.error("GET ACCOUNTS ERROR:", err);
@@ -12,9 +12,9 @@ export async function getAccounts(req, res) {
 }
 
 // CREATE
-export async function createAccount(req, res) {
+export async function createTradingAccount(req, res) {
   try {
-    const account = await Account.create({
+    const account = await TradingAccount.create({
       name: req.body.name,
       type: req.body.type,
       balance: req.body.balance,
@@ -30,7 +30,7 @@ export async function createAccount(req, res) {
 // DELETE
 export async function deleteAccount(req, res) {
   try {
-    await Account.deleteOne({ _id: req.params.id, user: req.user._id });
+    await TradingAccount.deleteOne({ _id: req.params.id, user: req.user._id });
     res.json({ ok: true });
   } catch (err) {
     console.error("DELETE ACCOUNT ERROR:", err);
