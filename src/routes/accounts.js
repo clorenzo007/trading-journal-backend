@@ -9,6 +9,5 @@ const router = express.Router();
 
 router.get("/", auth, getAccounts);
 router.post("/", auth, createAccount);
-router.delete("/:id", auth, deleteAccount);
 
 export default router;
