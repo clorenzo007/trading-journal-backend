@@ -41,6 +41,12 @@ app.use(express.json());
 
 // ================= DB =================
 await connectDB();
+//  ==================================
+// ======== NO USES CACHE DEL BROWSER =========
+app.use((req, res, next) => {
+  res.setHeader("Cache-Control", "no-store");
+  next();
+});
 
 // ================= ROUTES =================
 app.use("/auth", authRoutes);
