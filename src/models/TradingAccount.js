@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const tradingAccountSchema = new mongoose.Schema(
   {
@@ -7,19 +7,14 @@ const tradingAccountSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-
-    accountTypeId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "AccountType",
-    },
-
-    name: { type: String, required: true },
-    provider: { type: String, required: true },
-    currency: { type: String, required: true },
-    accountNumber: { type: String, required: true },
-    initialBalance: { type: Number, required: true },
+    accountTypeId: { type: mongoose.Schema.Types.ObjectId, ref: "AccountType" },
+    name: String,
+    provider: String,
+    currency: String,
+    accountNumber: String,
+    initialBalance: Number,
   },
   { timestamps: true },
 );
 
-module.exports = mongoose.model("TradingAccount", tradingAccountSchema);
+export default mongoose.model("TradingAccount", tradingAccountSchema);
