@@ -10,6 +10,6 @@ router.post("/register", register);
 router.post("/login", login);
 
 // Privada
-router.get("/me", auth, getMe);
+router.get("/me", getMe);
 
 export default router;
