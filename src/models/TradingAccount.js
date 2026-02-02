@@ -7,12 +7,24 @@ const tradingAccountSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    accountTypeId: { type: mongoose.Schema.Types.ObjectId, ref: "AccountType" },
-    name: String,
+
+    accountTypeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "AccountType",
+    },
+
+    name: { type: String, required: true },
     provider: String,
-    currency: String,
+    currency: { type: String, default: "USD" },
     accountNumber: String,
-    initialBalance: Number,
+    initialBalance: { type: Number, default: 0 },
+
+    // 🔥 ESTA ES LA CLAVE
+    status: {
+      type: String,
+      enum: ["active", "archived"],
+      default: "archived",
+    },
   },
   { timestamps: true },
 );

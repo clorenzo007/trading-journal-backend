@@ -1,21 +1,28 @@
 import TradingAccount from "../models/TradingAccount.js";
 
-// CREATE
 export const createAccount = async (req, res) => {
   try {
+    const { name, provider, currency, accountNumber, initialBalance } =
+      req.body;
+
+    // 🔥 Desactivar todas las cuentas del usuario
+    await TradingAccount.updateMany(
+      { userId: req.user.id },
+      { $set: { status: "archived" } },
+    );
+
     const account = await TradingAccount.create({
-      ...req.body,
-      userId: req.user._id,
+      userId: req.user.id,
+      name,
+      provider,
+      currency,
+      accountNumber,
+      initialBalance,
+      status: "active",
     });
+
     res.status(201).json(account);
   } catch (err) {
-    console.error("CREATE ACCOUNT ERROR:", err);
-    res.status(400).json({ error: err.message });
+    res.status(500).json({ error: "Error creating account" });
   }
-};
-
-// GET ALL
-export const getAccounts = async (req, res) => {
-  const accounts = await TradingAccount.find({ userId: req.user._id });
-  res.json(accounts);
 };
