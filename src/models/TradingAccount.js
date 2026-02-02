@@ -22,8 +22,8 @@ const tradingAccountSchema = new mongoose.Schema(
     // 🔥 ESTA ES LA CLAVE
     status: {
       type: String,
-      enum: ["active", "archived"],
-      default: "archived",
+      enum: ["active", "archived", "inactive"],
+      default: "inactive",
     },
   },
   { timestamps: true },
