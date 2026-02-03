@@ -40,11 +40,12 @@ export const getTrades = async (req, res) => {
 // =======================
 export const getTradeById = async (req, res) => {
   try {
-    const trade = await Trade.findOne({
-      _id: req.params.id,
-      user: req.user._id,
-      tradingAccount: req.tradingAccount._id, // ✅
+    const active = await TradingAccount.findOne({
+      userId: req.user.id,
+      status: "active",
     });
+
+    if (!active) return res.json([]); // 🔥 nunca error
 
     if (!trade) {
       return res.status(404).json({ error: "Trade not found" });

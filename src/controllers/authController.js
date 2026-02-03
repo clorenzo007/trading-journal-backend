@@ -1,59 +1,59 @@
-import User from "../models/User.js";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import TradingAccount from "../models/TradingAccount.js";
 
-function generateToken(id) {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: "30d",
-  });
-}
-
-// REGISTER
-export const register = async (req, res) => {
-  const { email, password } = req.body;
-
-  const exists = await User.findOne({ email });
-  if (exists) return res.status(400).json({ error: "User already exists" });
-
-  const user = await User.create({
-    email,
-    password, // 🔥 SIN HASH
-    role: "admin",
-  });
-
-  res.json({
-    token: generateToken(user._id),
-    user: {
-      _id: user._id,
-      email: user.email,
-      role: user.role,
-    },
-  });
+export const getAccounts = async (req, res) => {
+  try {
+    const accounts = await TradingAccount.find({ userId: req.user.id }).sort({
+      createdAt: -1,
+    });
+    res.json(accounts);
+  } catch {
+    res.status(500).json({ error: "Error fetching accounts" });
+  }
 };
 
-// LOGIN
-export const login = async (req, res) => {
-  const { email, password } = req.body;
+export const createAccount = async (req, res) => {
+  try {
+    const exists = await TradingAccount.findOne({
+      userId: req.user.id,
+      name: req.body.name,
+    });
 
-  const user = await User.findOne({ email });
-  if (!user) return res.status(400).json({ error: "Invalid credentials" });
+    if (exists)
+      return res.status(400).json({ error: "Account already exists" });
 
-  const ok = await user.comparePassword(password);
+    const account = await TradingAccount.create({
+      userId: req.user.id,
+      name: req.body.name,
+      provider: req.body.provider,
+      currency: req.body.currency,
+      accountNumber: req.body.accountNumber,
+      initialBalance: req.body.initialBalance || 0,
+      status: "inactive",
+    });
 
-  if (!ok) return res.status(400).json({ error: "Invalid credentials" });
-
-  res.json({
-    token: generateToken(user._id),
-    user: {
-      _id: user._id,
-      email: user.email,
-      role: user.role, // 👈 ESTO FALTABA
-    },
-  });
+    res.json(account);
+  } catch {
+    res.status(500).json({ error: "Error creating account" });
+  }
 };
 
-// GET ME
-export const getMe = async (req, res) => {
-  const user = await User.findById(req.user._id).select("-password");
-  res.json(user);
+export const activateAccount = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await TradingAccount.updateMany(
+      { userId: req.user.id },
+      { $set: { status: "inactive" } },
+    );
+
+    const updated = await TradingAccount.findOneAndUpdate(
+      { _id: id, userId: req.user.id },
+      { $set: { status: "active" } },
+      { new: true },
+    );
+
+    res.json(updated);
+  } catch {
+    res.status(500).json({ error: "Error activating account" });
+  }
 };

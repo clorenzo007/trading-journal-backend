@@ -29,4 +29,7 @@ const tradingAccountSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+// 🔥 Evita duplicados por usuario + nombre
+tradingAccountSchema.index({ userId: 1, name: 1 }, { unique: true });
+
 export default mongoose.model("TradingAccount", tradingAccountSchema);
