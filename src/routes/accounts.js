@@ -5,7 +5,7 @@ import {
   activateAccount, // 🔥 FALTABA ESTO
 } from "../controllers/accountController.js";
 
-import auth from "../middleware/auth.js";
+import auth from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 

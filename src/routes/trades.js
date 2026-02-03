@@ -1,5 +1,5 @@
 import express from "express";
-import auth from "../middleware/auth.js"; // ✅ DEFAULT
+import auth from "../middleware/authMiddleware.js"; // ✅ DEFAULT
 import { requireActiveAccount } from "../middleware/activeAccount.js";
 
 import {
