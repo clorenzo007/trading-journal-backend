@@ -57,3 +57,8 @@ export const activateAccount = async (req, res) => {
     res.status(500).json({ error: "Error activating account" });
   }
 };
+// GET ME
+export const getMe = async (req, res) => {
+  const user = await User.findById(req.user.id).select("-password");
+  res.json(user);
+};
