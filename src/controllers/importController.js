@@ -13,7 +13,6 @@ export const importMT5 = async (req, res) => {
       return res.status(400).json({ error: "accountId is required" });
     }
 
-    // ✅ Validar cuenta destino (pertenece al user logeado)
     const account = await TradingAccount.findOne({
       _id: accountId,
       userId: req.user.id,
@@ -23,9 +22,9 @@ export const importMT5 = async (req, res) => {
       return res.status(400).json({ error: "Invalid accountId" });
     }
 
-    // TODO: reemplazá esto con tu parser real
+    // 🔧 TODO: reemplazar por parser real MT5
     // const rows = await parseMT5File(req.file.path);
-    const rows = []; // placeholder: acá va tu data parseada
+    const rows = []; // placeholder
 
     let imported = 0;
     let skipped = 0;
@@ -34,9 +33,22 @@ export const importMT5 = async (req, res) => {
     for (const row of rows) {
       try {
         await Trade.create({
-          ...row,
-          user: req.user.id, // ✅ consistente con middleware
-          account: account._id, // ✅ destino elegido
+          user: req.user.id,
+          account: account._id,
+
+          symbol: row.symbol,
+          entry_date: row.entry_date,
+          entry_price: row.entry_price,
+          position_size: row.position_size,
+          stop_loss: row.stop_loss,
+          risk_percent: row.risk_percent,
+
+          exit_date: row.exit_date || null,
+          exit_price: row.exit_price || null,
+          profit_loss: row.profit_loss || null,
+          outcome: row.outcome || null,
+
+          external_id: row.ticket,
           source: "mt5",
         });
 

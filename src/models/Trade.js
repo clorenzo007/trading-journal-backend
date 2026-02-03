@@ -2,7 +2,12 @@ import mongoose from "mongoose";
 
 const TradeSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
     account: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "TradingAccount",
@@ -10,21 +15,37 @@ const TradeSchema = new mongoose.Schema(
       index: true,
     },
 
-    // Identidad
+    // ======================
+    // IDENTIDAD
+    // ======================
     symbol: { type: String, required: true },
-    strategy_type: { type: String, required: true },
-    pattern: { type: String, required: true },
 
-    // Entrada
+    strategy_type: {
+      type: String,
+      default: "MT5 Import", // ✅ DEFAULT
+    },
+
+    pattern: {
+      type: String,
+      default: "N/A", // ✅ DEFAULT
+    },
+
+    // ======================
+    // ENTRADA
+    // ======================
     entry_date: { type: Date, required: true },
     entry_price: { type: Number, required: true },
     position_size: { type: Number, required: true },
 
-    // Riesgo
+    // ======================
+    // RIESGO
+    // ======================
     stop_loss: { type: Number, required: true },
     risk_percent: { type: Number, required: true },
 
-    // Salida
+    // ======================
+    // SALIDA
+    // ======================
     exit_date: { type: Date },
     exit_price: { type: Number },
     profit_loss: { type: Number },
@@ -33,11 +54,22 @@ const TradeSchema = new mongoose.Schema(
       enum: ["Win", "Loss", "Break-even"],
     },
 
-    // Psicología pre
-    emotional_state_pre: { type: String, required: true },
-    reason_for_entry: { type: String, required: true },
+    // ======================
+    // PSICOLOGÍA (PRE)
+    // ======================
+    emotional_state_pre: {
+      type: String,
+      default: "Neutral", // ✅ DEFAULT
+    },
 
-    // Psicología post
+    reason_for_entry: {
+      type: String,
+      default: "Imported from MT5", // ✅ DEFAULT
+    },
+
+    // ======================
+    // PSICOLOGÍA (POST)
+    // ======================
     emotional_state_post: { type: String },
     reason_for_exit: { type: String },
     review_notes: { type: String },
@@ -45,7 +77,6 @@ const TradeSchema = new mongoose.Schema(
     // ======================
     // IMÁGENES
     // ======================
-
     entryImage: {
       url: String,
       public_id: String,
@@ -57,9 +88,8 @@ const TradeSchema = new mongoose.Schema(
     },
 
     // ======================
-    // SISTEMA DE REVIEW
+    // REVIEW SYSTEM
     // ======================
-
     reviewed: {
       type: Boolean,
       default: false,
@@ -73,6 +103,10 @@ const TradeSchema = new mongoose.Schema(
       wouldRepeat: Boolean,
       createdAt: Date,
     },
+
+    // ======================
+    // IMPORT / EXTERNAL
+    // ======================
     external_id: { type: String, index: true },
     source: { type: String, default: "manual" },
   },
