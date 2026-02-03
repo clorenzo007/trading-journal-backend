@@ -13,12 +13,13 @@ const protect = async (req, res, next) => {
     const user = await User.findById(decoded.id).select("-password");
     if (!user) return res.status(401).json({ error: "Not authorized" });
 
+    // 🔥 ESTA LÍNEA ES LA CLAVE
     req.user = { id: user._id.toString(), role: user.role };
+
     next();
   } catch {
     return res.status(401).json({ error: "Not authorized" });
   }
 };
 
-export default protect; // ✅ DEFAULT
-export { protect }; // ✅ named también, por compatibilidad
+export default protect;
