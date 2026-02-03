@@ -1,85 +1,136 @@
-import User from "../models/User.js";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-
-function generateToken(id) {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
-}
+import mongoose from "mongoose";
+import TradingAccount from "../models/TradingAccount.js";
 
 // =========================
-// REGISTER
+// GET ACCOUNTS
 // =========================
-export const register = async (req, res) => {
+export const getAccounts = async (req, res) => {
   try {
-    let { email, password } = req.body;
-
-    email = (email || "").trim().toLowerCase();
-    password = password || "";
-
-    if (!email || !password) {
-      return res.status(400).json({ error: "Email and password are required" });
-    }
-
-    const exists = await User.findOne({ email });
-    if (exists) return res.status(400).json({ error: "User already exists" });
-
-    // 🔥 NO hashear acá: el model pre('save') lo hace
-    const user = await User.create({
-      email,
-      password,
-      role: "admin", // tu lógica: primer user admin (si querés, luego lo refinamos)
+    const accounts = await TradingAccount.find({ userId: req.user.id }).sort({
+      createdAt: -1,
     });
 
-    return res.json({
-      token: generateToken(user._id),
-      user: { _id: user._id, email: user.email, role: user.role },
-    });
+    return res.json(accounts);
   } catch (err) {
-    console.error("REGISTER ERROR:", err);
-    return res.status(500).json({ error: "Server error" });
+    console.error("GET ACCOUNTS ERROR:", err);
+    return res.status(500).json({ error: "Error fetching accounts" });
   }
 };
 
 // =========================
-// LOGIN
+// CREATE ACCOUNT
 // =========================
-export const login = async (req, res) => {
+export const createAccount = async (req, res) => {
   try {
-    let { email, password } = req.body;
+    const name = (req.body.name || "").trim();
+    if (!name) return res.status(400).json({ error: "Name required" });
 
-    email = (email || "").trim().toLowerCase();
-    password = password || "";
-
-    if (!email || !password) {
-      return res.status(400).json({ error: "Email and password are required" });
-    }
-
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ error: "Invalid credentials" });
-
-    // ✅ usar método del modelo (o bcrypt.compare directo)
-    const ok = await user.comparePassword(password);
-    if (!ok) return res.status(400).json({ error: "Invalid credentials" });
-
-    return res.json({
-      token: generateToken(user._id),
-      user: { _id: user._id, email: user.email, role: user.role },
+    const account = await TradingAccount.create({
+      userId: req.user.id,
+      accountTypeId: req.body.accountTypeId,
+      name,
+      provider: req.body.provider,
+      currency: req.body.currency,
+      accountNumber: req.body.accountNumber,
+      initialBalance: req.body.initialBalance || 0,
+      status: "inactive",
     });
+
+    return res.json(account);
   } catch (err) {
-    console.error("LOGIN ERROR:", err);
-    return res.status(500).json({ error: "Server error" });
+    // 🔥 duplicate key (userId + nameKey/name)
+    if (err?.code === 11000) {
+      return res.status(400).json({ error: "Account already exists" });
+    }
+    console.error("CREATE ACCOUNT ERROR:", err);
+    return res.status(500).json({ error: "Error creating account" });
   }
 };
 
 // =========================
-// GET ME
+// ACTIVATE ACCOUNT (ATOMIC)
 // =========================
-export const getMe = async (req, res) => {
+export const activateAccount = async (req, res) => {
+  const session = await mongoose.startSession();
   try {
-    const user = await User.findById(req.user.id).select("-password");
-    return res.json(user);
+    const { id } = req.params;
+
+    await session.withTransaction(async () => {
+      await TradingAccount.updateMany(
+        { userId: req.user.id },
+        { $set: { status: "inactive" } },
+        { session },
+      );
+
+      const updated = await TradingAccount.findOneAndUpdate(
+        { _id: id, userId: req.user.id },
+        { $set: { status: "active" } },
+        { new: true, session },
+      );
+
+      if (!updated) throw new Error("Account not found");
+    });
+
+    const active = await TradingAccount.findOne({
+      userId: req.user.id,
+      status: "active",
+    });
+
+    return res.json(active);
   } catch (err) {
-    console.error("GETME ERROR:", err);
-    return res.status(500).json({ error: "Server error" });
+    console.error("ACTIVATE ERROR:", err);
+    return res.status(500).json({ error: "Error activating account" });
+  } finally {
+    session.endSession();
+  }
+};
+
+// =========================
+// UPDATE ACCOUNT
+// =========================
+export const updateAccount = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const updates = { ...req.body };
+    if (typeof updates.name === "string") updates.name = updates.name.trim();
+
+    const updated = await TradingAccount.findOneAndUpdate(
+      { _id: id, userId: req.user.id },
+      { $set: updates },
+      { new: true },
+    );
+
+    if (!updated) return res.status(404).json({ error: "Account not found" });
+
+    return res.json(updated);
+  } catch (err) {
+    if (err?.code === 11000) {
+      return res.status(400).json({ error: "Account already exists" });
+    }
+    console.error("UPDATE ACCOUNT ERROR:", err);
+    return res.status(500).json({ error: "Error updating account" });
+  }
+};
+
+// =========================
+// ARCHIVE ACCOUNT
+// =========================
+export const archiveAccount = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const updated = await TradingAccount.findOneAndUpdate(
+      { _id: id, userId: req.user.id },
+      { $set: { status: "archived" } },
+      { new: true },
+    );
+
+    if (!updated) return res.status(404).json({ error: "Account not found" });
+
+    return res.json(updated);
+  } catch (err) {
+    console.error("ARCHIVE ACCOUNT ERROR:", err);
+    return res.status(500).json({ error: "Error archiving account" });
   }
 };
