@@ -1,64 +1,85 @@
-import TradingAccount from "../models/TradingAccount.js";
+import User from "../models/User.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
-export const getAccounts = async (req, res) => {
+function generateToken(id) {
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
+}
+
+// =========================
+// REGISTER
+// =========================
+export const register = async (req, res) => {
   try {
-    const accounts = await TradingAccount.find({ userId: req.user.id }).sort({
-      createdAt: -1,
+    let { email, password } = req.body;
+
+    email = (email || "").trim().toLowerCase();
+    password = password || "";
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+
+    const exists = await User.findOne({ email });
+    if (exists) return res.status(400).json({ error: "User already exists" });
+
+    // 🔥 NO hashear acá: el model pre('save') lo hace
+    const user = await User.create({
+      email,
+      password,
+      role: "admin", // tu lógica: primer user admin (si querés, luego lo refinamos)
     });
-    res.json(accounts);
-  } catch {
-    res.status(500).json({ error: "Error fetching accounts" });
+
+    return res.json({
+      token: generateToken(user._id),
+      user: { _id: user._id, email: user.email, role: user.role },
+    });
+  } catch (err) {
+    console.error("REGISTER ERROR:", err);
+    return res.status(500).json({ error: "Server error" });
   }
 };
 
-export const createAccount = async (req, res) => {
+// =========================
+// LOGIN
+// =========================
+export const login = async (req, res) => {
   try {
-    const exists = await TradingAccount.findOne({
-      userId: req.user.id,
-      name: req.body.name,
+    let { email, password } = req.body;
+
+    email = (email || "").trim().toLowerCase();
+    password = password || "";
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ error: "Invalid credentials" });
+
+    // ✅ usar método del modelo (o bcrypt.compare directo)
+    const ok = await user.comparePassword(password);
+    if (!ok) return res.status(400).json({ error: "Invalid credentials" });
+
+    return res.json({
+      token: generateToken(user._id),
+      user: { _id: user._id, email: user.email, role: user.role },
     });
-
-    if (exists)
-      return res.status(400).json({ error: "Account already exists" });
-
-    const account = await TradingAccount.create({
-      userId: req.user.id,
-      name: req.body.name,
-      provider: req.body.provider,
-      currency: req.body.currency,
-      accountNumber: req.body.accountNumber,
-      initialBalance: req.body.initialBalance || 0,
-      status: "inactive",
-    });
-
-    res.json(account);
-  } catch {
-    res.status(500).json({ error: "Error creating account" });
+  } catch (err) {
+    console.error("LOGIN ERROR:", err);
+    return res.status(500).json({ error: "Server error" });
   }
 };
 
-export const activateAccount = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    await TradingAccount.updateMany(
-      { userId: req.user.id },
-      { $set: { status: "inactive" } },
-    );
-
-    const updated = await TradingAccount.findOneAndUpdate(
-      { _id: id, userId: req.user.id },
-      { $set: { status: "active" } },
-      { new: true },
-    );
-
-    res.json(updated);
-  } catch {
-    res.status(500).json({ error: "Error activating account" });
-  }
-};
+// =========================
 // GET ME
+// =========================
 export const getMe = async (req, res) => {
-  const user = await User.findById(req.user.id).select("-password");
-  res.json(user);
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    return res.json(user);
+  } catch (err) {
+    console.error("GETME ERROR:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
 };
