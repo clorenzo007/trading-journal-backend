@@ -1,7 +1,5 @@
 import Trade from "../models/Trade.js";
-
-// Asume que ya tenés la lógica de parseo del archivo (CSV/XLSX) en alguna función
-// Ejemplo: parseMT5File(filePath) -> devuelve array de trades
+import TradingAccount from "../models/TradingAccount.js";
 
 export const importMT5 = async (req, res) => {
   try {
@@ -9,12 +7,24 @@ export const importMT5 = async (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    const account = req.account; // viene del middleware
-    const user = req.user;
+    const { accountId } = req.body;
+
+    if (!accountId) {
+      return res.status(400).json({ error: "accountId is required" });
+    }
+
+    // ✅ Validar cuenta destino (pertenece al user logeado)
+    const account = await TradingAccount.findOne({
+      _id: accountId,
+      userId: req.user.id,
+    });
+
+    if (!account) {
+      return res.status(400).json({ error: "Invalid accountId" });
+    }
 
     // TODO: reemplazá esto con tu parser real
     // const rows = await parseMT5File(req.file.path);
-
     const rows = []; // placeholder: acá va tu data parseada
 
     let imported = 0;
@@ -23,11 +33,10 @@ export const importMT5 = async (req, res) => {
 
     for (const row of rows) {
       try {
-        // Ajustá los campos según tu estructura real
         await Trade.create({
           ...row,
-          user: user._id,
-          account: account._id,
+          user: req.user.id, // ✅ consistente con middleware
+          account: account._id, // ✅ destino elegido
           source: "mt5",
         });
 
@@ -38,7 +47,7 @@ export const importMT5 = async (req, res) => {
       }
     }
 
-    res.json({
+    return res.json({
       imported,
       skipped,
       errors,
@@ -49,6 +58,6 @@ export const importMT5 = async (req, res) => {
     });
   } catch (err) {
     console.error("IMPORT MT5 ERROR:", err);
-    res.status(500).json({ error: "Import failed" });
+    return res.status(500).json({ error: "Import failed" });
   }
 };

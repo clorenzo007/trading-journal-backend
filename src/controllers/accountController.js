@@ -24,15 +24,16 @@ export const createAccount = async (req, res) => {
     const name = (req.body.name || "").trim();
     if (!name) return res.status(400).json({ error: "Name required" });
 
+    const count = await TradingAccount.countDocuments({ userId: req.user.id });
+
     const account = await TradingAccount.create({
       userId: req.user.id,
-      accountTypeId: req.body.accountTypeId,
       name,
       provider: req.body.provider,
       currency: req.body.currency || "USD",
       accountNumber: req.body.accountNumber,
       initialBalance: req.body.initialBalance || 0,
-      status: "inactive",
+      status: count === 0 ? "active" : "inactive", // 🔥 clave
     });
 
     return res.json(account);
@@ -40,7 +41,6 @@ export const createAccount = async (req, res) => {
     if (err?.code === 11000) {
       return res.status(400).json({ error: "Account already exists" });
     }
-    console.error("CREATE ACCOUNT ERROR:", err);
     return res.status(500).json({ error: "Error creating account" });
   }
 };
