@@ -15,12 +15,10 @@ export const register = async (req, res) => {
   const exists = await User.findOne({ email });
   if (exists) return res.status(400).json({ error: "User already exists" });
 
-  const hashed = await bcrypt.hash(password, 10);
-
   const user = await User.create({
     email,
-    password: hashed,
-    role: "admin", // 👈 PRIMER USER ES ADMIN
+    password, // 🔥 SIN HASH
+    role: "admin",
   });
 
   res.json({
@@ -40,7 +38,8 @@ export const login = async (req, res) => {
   const user = await User.findOne({ email });
   if (!user) return res.status(400).json({ error: "Invalid credentials" });
 
-  const ok = await bcrypt.compare(password, user.password);
+  const ok = await user.comparePassword(password);
+
   if (!ok) return res.status(400).json({ error: "Invalid credentials" });
 
   res.json({
