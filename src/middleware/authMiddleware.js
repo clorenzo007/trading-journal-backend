@@ -13,13 +13,14 @@ const protect = async (req, res, next) => {
     const user = await User.findById(decoded.id).select("-password");
     if (!user) return res.status(401).json({ error: "Not authorized" });
 
-    // 🔥 ESTA LÍNEA ES LA CLAVE
-    req.user = { id: user._id.toString(), role: user.role };
+    // 🔥 clave: siempre req.user.id
+    req.user = { id: user._id.toString(), role: user.role, email: user.email };
 
     next();
-  } catch {
+  } catch (err) {
     return res.status(401).json({ error: "Not authorized" });
   }
 };
 
-export default protect;
+export default protect; // ✅ para: import protect from "..."
+export { protect }; // ✅ para: import { protect } from "..."
