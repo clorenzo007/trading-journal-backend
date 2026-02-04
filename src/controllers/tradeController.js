@@ -8,7 +8,7 @@ export const createTrade = async (req, res) => {
     const trade = await Trade.create({
       ...req.body,
       user: req.user._id,
-      account: req.account._id, // 🔥 NOMBRE CORRECTO
+      tradingAccount: req.tradingAccount._id,
     });
 
     res.status(201).json(trade);
@@ -19,13 +19,13 @@ export const createTrade = async (req, res) => {
 };
 
 // =======================
-// GET ALL (cuenta activa)
+// GET ALL (ACTIVE ACCOUNT)
 // =======================
 export const getTrades = async (req, res) => {
   try {
     const trades = await Trade.find({
       user: req.user._id,
-      account: req.account._id,
+      tradingAccount: req.tradingAccount._id,
     }).sort({ entry_date: -1 });
 
     res.json(trades);
@@ -34,6 +34,55 @@ export const getTrades = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch trades" });
   }
 };
+
+// =======================
+// GET ONE BY ID
+// =======================
+export const getTradeById = async (req, res) => {
+  try {
+    const trade = await Trade.findOne({
+      _id: req.params.id,
+      user: req.user._id,
+      tradingAccount: req.tradingAccount._id,
+    });
+
+    if (!trade) {
+      return res.status(404).json({ error: "Trade not found" });
+    }
+
+    res.json(trade);
+  } catch (err) {
+    console.error("GET TRADE BY ID ERROR:", err);
+    res.status(500).json({ error: "Failed to fetch trade" });
+  }
+};
+
+// =======================
+// UPDATE
+// =======================
+export const updateTrade = async (req, res) => {
+  try {
+    const trade = await Trade.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        user: req.user._id,
+        tradingAccount: req.tradingAccount._id,
+      },
+      req.body,
+      { new: true },
+    );
+
+    if (!trade) {
+      return res.status(404).json({ error: "Trade not found" });
+    }
+
+    res.json(trade);
+  } catch (err) {
+    console.error("UPDATE TRADE ERROR:", err);
+    res.status(400).json({ error: err.message });
+  }
+};
+
 // =======================
 // DELETE
 // =======================
