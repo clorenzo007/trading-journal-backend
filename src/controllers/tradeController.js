@@ -8,7 +8,7 @@ export const createTrade = async (req, res) => {
     const trade = await Trade.create({
       ...req.body,
       user: req.user._id,
-      tradingAccount: req.tradingAccount._id, // ✅ nombre correcto
+      account: req.tradingAccount._id, // ✅ nombre correcto
     });
 
     res.status(201).json(trade);
@@ -25,7 +25,7 @@ export const getTrades = async (req, res) => {
   try {
     const trades = await Trade.find({
       user: req.user._id,
-      tradingAccount: req.tradingAccount._id, // ✅
+      account: req.tradingAccount._id, // ✅
     }).sort({ entry_date: -1 });
 
     res.json(trades);
@@ -40,7 +40,7 @@ export const getTrades = async (req, res) => {
 // =======================
 export const getTradeById = async (req, res) => {
   try {
-    const active = await TradingAccount.findOne({
+    const active = await tradingAccount.findOne({
       userId: req.user.id,
       status: "active",
     });
@@ -67,7 +67,7 @@ export const updateTrade = async (req, res) => {
       {
         _id: req.params.id,
         user: req.user._id,
-        tradingAccount: req.tradingAccount._id, // ✅
+        account: req.tradingAccount._id, // ✅
       },
       req.body,
       { new: true },
@@ -92,7 +92,7 @@ export const deleteTrade = async (req, res) => {
     const trade = await Trade.findOneAndDelete({
       _id: req.params.id,
       user: req.user._id,
-      tradingAccount: req.tradingAccount._id, // ✅
+      account: req.tradingAccount._id, // ✅
     });
 
     if (!trade) {
