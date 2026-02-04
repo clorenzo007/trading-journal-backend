@@ -34,3 +34,24 @@ export const getTrades = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch trades" });
   }
 };
+// =======================
+// DELETE
+// =======================
+export const deleteTrade = async (req, res) => {
+  try {
+    const trade = await Trade.findOneAndDelete({
+      _id: req.params.id,
+      user: req.user._id,
+      tradingAccount: req.tradingAccount._id,
+    });
+
+    if (!trade) {
+      return res.status(404).json({ error: "Trade not found" });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("DELETE TRADE ERROR:", err);
+    res.status(500).json({ error: "Failed to delete trade" });
+  }
+};
