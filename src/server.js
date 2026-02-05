@@ -18,6 +18,7 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:5173",
   "https://trading-journal-livermore.vercel.app",
+  ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : []),
 ];
 
 app.use(
