@@ -4,7 +4,7 @@ import cloudinary from "../config/cloudinary.js";
 // ================= GET ALL SETUPS (USER SCOPED) =================
 export const getSetups = async (req, res) => {
   try {
-    const setups = await Setup.find({ user: req.user._id }).sort({ createdAt: -1 });
+    const setups = await Setup.find({ user: req.user._id }).sort({ order: 1, createdAt: -1 });
     res.json(setups);
   } catch (err) {
     console.error("GET SETUPS ERROR:", err);
@@ -15,10 +15,45 @@ export const getSetups = async (req, res) => {
 // ================= CREATE SETUP =================
 export const createSetup = async (req, res) => {
   try {
-    const setup = await Setup.create({
+    const setup = new Setup({
       ...req.body,
       user: req.user._id,
     });
+
+    // Handle files if provided during creation (theoryImage, exampleImage)
+    if (req.files) {
+      const uploadPromises = [];
+
+      if (req.files.theoryImage) {
+        uploadPromises.push(new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "trading-journal/setups/theory" },
+            (err, res) => err ? reject(err) : resolve({ field: 'theoryImage', ...res })
+          );
+          stream.end(req.files.theoryImage[0].buffer);
+        }));
+      }
+
+      if (req.files.exampleImage) {
+        uploadPromises.push(new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "trading-journal/setups/example" },
+            (err, res) => err ? reject(err) : resolve({ field: 'exampleImage', ...res })
+          );
+          stream.end(req.files.exampleImage[0].buffer);
+        }));
+      }
+
+      const results = await Promise.all(uploadPromises);
+      results.forEach(res => {
+        setup[res.field] = {
+          url: res.secure_url,
+          public_id: res.public_id
+        };
+      });
+    }
+
+    await setup.save();
     res.status(201).json(setup);
   } catch (err) {
     console.error("CREATE SETUP ERROR:", err);
@@ -107,5 +142,20 @@ export const uploadSetupImage = async (req, res) => {
   } catch (err) {
     console.error("SETUP IMAGE UPLOAD ERROR:", err);
     res.status(500).json({ error: "Upload failed" });
+  }
+};
+
+// ================= UPDATE SETUPS ORDER =================
+export const updateSetupsOrder = async (req, res) => {
+  try {
+    const { orders } = req.body; // Array of { id, order }
+    const promises = orders.map(({ id, order }) =>
+      Setup.findOneAndUpdate({ _id: id, user: req.user._id }, { order })
+    );
+    await Promise.all(promises);
+    res.json({ success: true });
+  } catch (err) {
+    console.error("UPDATE SETUPS ORDER ERROR:", err);
+    res.status(500).json({ error: "Failed to update order" });
   }
 };

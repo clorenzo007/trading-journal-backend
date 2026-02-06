@@ -6,6 +6,7 @@ import {
   updateConcept,
   deleteConcept,
   uploadConceptImage,
+  updateConceptsOrder,
 } from "../controllers/conceptController.js";
 import upload from "../middleware/upload.js";
 
@@ -14,7 +15,8 @@ const router = express.Router();
 router.use(auth);
 
 router.get("/", getConcepts);
-router.post("/", createConcept);
+router.post("/", upload.single("file"), createConcept);
+router.put("/order", updateConceptsOrder);
 router.put("/:id", updateConcept);
 router.delete("/:id", deleteConcept);
 

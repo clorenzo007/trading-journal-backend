@@ -4,7 +4,7 @@ import Concept from "../models/Concept.js";
 // GET ALL CONCEPTS FOR USER
 export const getConcepts = async (req, res) => {
   try {
-    const concepts = await Concept.find({ user: req.user._id }).sort({ order: 1 });
+    const concepts = await Concept.find({ user: req.user._id }).sort({ order: 1, createdAt: -1 });
     res.json(concepts);
   } catch (err) {
     console.error("GET CONCEPTS ERROR:", err);
@@ -15,10 +15,41 @@ export const getConcepts = async (req, res) => {
 // CREATE CONCEPT
 export const createConcept = async (req, res) => {
   try {
-    const concept = new Concept({
+    const conceptData = {
       ...req.body,
       user: req.user._id,
-    });
+    };
+
+    // Handle files if items is an array of strings in body it might need parsing if it was sent as stringified json in multipart
+    if (typeof conceptData.items === 'string') {
+      try {
+        conceptData.items = JSON.parse(conceptData.items);
+      } catch (e) {
+        conceptData.items = [conceptData.items];
+      }
+    }
+
+    const concept = new Concept(conceptData);
+
+    // If file is provided during creation
+    if (req.file) {
+      const result = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder: "concepts" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          },
+        );
+        uploadStream.end(req.file.buffer);
+      });
+
+      concept.image = {
+        url: result.secure_url,
+        public_id: result.public_id,
+      };
+    }
+
     await concept.save();
     res.status(201).json(concept);
   } catch (err) {
@@ -104,5 +135,20 @@ export const uploadConceptImage = async (req, res) => {
   } catch (err) {
     console.error("UPLOAD CONCEPT IMAGE ERROR:", err);
     res.status(500).json({ error: "Failed to upload image" });
+  }
+};
+
+// UPDATE CONCEPTS ORDER
+export const updateConceptsOrder = async (req, res) => {
+  try {
+    const { orders } = req.body; // Array of { id, order }
+    const promises = orders.map(({ id, order }) =>
+      Concept.findOneAndUpdate({ _id: id, user: req.user._id }, { order })
+    );
+    await Promise.all(promises);
+    res.json({ success: true });
+  } catch (err) {
+    console.error("UPDATE CONCEPTS ORDER ERROR:", err);
+    res.status(500).json({ error: "Failed to update order" });
   }
 };

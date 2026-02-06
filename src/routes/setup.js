@@ -6,6 +6,7 @@ import {
   updateSetup,
   deleteSetup,
   uploadSetupImage,
+  updateSetupsOrder,
 } from "../controllers/setupController.js";
 import upload from "../middleware/upload.js";
 
@@ -14,7 +15,15 @@ const router = express.Router();
 router.use(auth);
 
 router.get("/", getSetups);
-router.post("/", createSetup);
+router.post(
+  "/",
+  upload.fields([
+    { name: "theoryImage", maxCount: 1 },
+    { name: "exampleImage", maxCount: 1 },
+  ]),
+  createSetup
+);
+router.put("/order", updateSetupsOrder);
 router.put("/:id", updateSetup);
 router.delete("/:id", deleteSetup);
 
