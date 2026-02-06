@@ -2,9 +2,69 @@ import cloudinary from "../config/cloudinary.js";
 import Concept from "../models/Concept.js";
 
 // GET ALL CONCEPTS FOR USER
-// ... (rest of the controller remains the same)
+export const getConcepts = async (req, res) => {
+  try {
+    const concepts = await Concept.find({ user: req.user._id }).sort({ order: 1 });
+    res.json(concepts);
+  } catch (err) {
+    console.error("GET CONCEPTS ERROR:", err);
+    res.status(500).json({ error: "Failed to fetch concepts" });
+  }
+};
 
-// ... (other functions)
+// CREATE CONCEPT
+export const createConcept = async (req, res) => {
+  try {
+    const concept = new Concept({
+      ...req.body,
+      user: req.user._id,
+    });
+    await concept.save();
+    res.status(201).json(concept);
+  } catch (err) {
+    console.error("CREATE CONCEPT ERROR:", err);
+    res.status(400).json({ error: err.message });
+  }
+};
+
+// UPDATE CONCEPT
+export const updateConcept = async (req, res) => {
+  try {
+    const concept = await Concept.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id },
+      req.body,
+      { new: true }
+    );
+    if (!concept) return res.status(404).json({ error: "Concept not found" });
+    res.json(concept);
+  } catch (err) {
+    console.error("UPDATE CONCEPT ERROR:", err);
+    res.status(400).json({ error: err.message });
+  }
+};
+
+// DELETE CONCEPT
+export const deleteConcept = async (req, res) => {
+  try {
+    const concept = await Concept.findOne({ _id: req.params.id, user: req.user._id });
+    if (!concept) return res.status(404).json({ error: "Concept not found" });
+
+    // Delete image from Cloudinary if it exists
+    if (concept.image?.public_id) {
+      try {
+        await cloudinary.uploader.destroy(concept.image.public_id);
+      } catch (err) {
+        console.error("DELETE CONCEPT IMAGE ERROR:", err);
+      }
+    }
+
+    await Concept.deleteOne({ _id: req.params.id });
+    res.json({ success: true });
+  } catch (err) {
+    console.error("DELETE CONCEPT ERROR:", err);
+    res.status(500).json({ error: "Failed to delete concept" });
+  }
+};
 
 // UPLOAD CONCEPT IMAGE
 export const uploadConceptImage = async (req, res) => {
