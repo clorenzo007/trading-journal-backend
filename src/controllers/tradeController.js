@@ -4,6 +4,7 @@ import Trade from "../models/Trade.js";
 // CREATE
 // =======================
 export const createTrade = async (req, res) => {
+  console.log("CREATE TRADE CONTROLLER - User:", req.user?._id, "Account:", req.account?._id);
   try {
     const trade = await Trade.create({
       ...req.body,

@@ -9,6 +9,8 @@ import importRoutes from "./routes/import.js";
 import accountRoutes from "./routes/accounts.js";
 import uploadRoutes from "./routes/upload.js";
 import adminRoutes from "./routes/admin.js";
+import setupRoutes from "./routes/setup.js";
+import conceptRoutes from "./routes/concept.js";
 
 dotenv.config();
 
@@ -25,6 +27,10 @@ app.use(
   cors({
     origin: function (origin, callback) {
       if (!origin) return callback(null, true);
+      
+      // 🔥 Allow any localhost (dynamic ports like 5174, 5175, etc.)
+      if (origin.match(/^http:\/\/localhost:\d+$/)) return callback(null, true);
+
       if (allowedOrigins.includes(origin)) return callback(null, true);
       return callback(new Error("Not allowed by CORS"));
     },
@@ -49,18 +55,20 @@ app.use((req, res, next) => {
   next();
 });
 
+// ================= HEALTH =================
+app.get("/", (req, res) => {
+  res.json({ status: "API running" });
+});
+
 // ================= ROUTES =================
 app.use("/auth", authRoutes);
 app.use("/trades", tradeRoutes);
 app.use("/import", importRoutes);
 app.use("/accounts", accountRoutes);
 app.use("/admin", adminRoutes);
+app.use("/setups", setupRoutes);
+app.use("/concepts", conceptRoutes);
 app.use("/", uploadRoutes);
-
-// ================= HEALTH =================
-app.get("/", (req, res) => {
-  res.json({ status: "API running" });
-});
 
 // ================= START =================
 const PORT = process.env.PORT || 4000;

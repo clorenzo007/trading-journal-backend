@@ -11,19 +11,28 @@ export const uploadEntryImage = async (req, res) => {
       async (error, uploaded) => {
         if (error) return res.status(500).json({ error: "Cloudinary error" });
 
-        const trade = await Trade.findOneAndUpdate(
-          { _id: req.params.id, user: req.user._id, account: req.account._id },
-          {
-            entryImage: {
-              url: uploaded.secure_url,
-              public_id: uploaded.public_id,
-            },
-          },
-          { new: true },
-        );
+        const trade = await Trade.findOne({
+          _id: req.params.id,
+          user: req.user._id,
+        });
 
         if (!trade) return res.status(404).json({ error: "Trade not found" });
 
+        // Delete old image if it exists
+        if (trade.entryImage?.public_id) {
+          try {
+            await cloudinary.uploader.destroy(trade.entryImage.public_id);
+          } catch (err) {
+            console.error("OLD IMAGE DELETE ERROR:", err);
+          }
+        }
+
+        trade.entryImage = {
+          url: uploaded.secure_url,
+          public_id: uploaded.public_id,
+        };
+
+        await trade.save();
         res.json(trade);
       },
     );
@@ -45,19 +54,28 @@ export const uploadReviewImage = async (req, res) => {
       async (error, uploaded) => {
         if (error) return res.status(500).json({ error: "Cloudinary error" });
 
-        const trade = await Trade.findOneAndUpdate(
-          { _id: req.params.id, user: req.user._id, account: req.account._id },
-          {
-            reviewImage: {
-              url: uploaded.secure_url,
-              public_id: uploaded.public_id,
-            },
-          },
-          { new: true },
-        );
+        const trade = await Trade.findOne({
+          _id: req.params.id,
+          user: req.user._id,
+        });
 
         if (!trade) return res.status(404).json({ error: "Trade not found" });
 
+        // Delete old image if it exists
+        if (trade.reviewImage?.public_id) {
+          try {
+            await cloudinary.uploader.destroy(trade.reviewImage.public_id);
+          } catch (err) {
+            console.error("OLD IMAGE DELETE ERROR:", err);
+          }
+        }
+
+        trade.reviewImage = {
+          url: uploaded.secure_url,
+          public_id: uploaded.public_id,
+        };
+
+        await trade.save();
         res.json(trade);
       },
     );

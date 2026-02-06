@@ -11,12 +11,12 @@ export const requireActiveAccount = async (req, res, next) => {
     if (accountId) {
       account = await TradingAccount.findOne({
         _id: accountId,
-        user: userId,
+        userId: userId,
         status: "active",
       });
     } else {
       account = await TradingAccount.findOne({
-        user: userId,
+        userId: userId,
         status: "active",
       }).sort({ createdAt: 1 });
     }

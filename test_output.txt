@@ -1,0 +1,41 @@
+­ƒÜÇ Starting Backend Tests...
+­ƒôì Targeting: http://localhost:4000
+
+--- 1. Health Check ---
+Ô£à Health Check: { status: 'API running' }
+
+--- 2. Auth - Register ---
+Ôä╣´©Å User already exists, skipping registration.
+
+--- 3. Auth - Login ---
+Ô£à Login successful, token received.
+
+--- 4. Accounts - Setup ---
+Ô£à Found Existing Account: 6985ba61743c5eb9031042ad
+
+--- 5. Trades - Create Trade ---
+Ô£à Trade Created: {
+  user: '6985ba60743c5eb9031042a6',
+  account: '6985ba61743c5eb9031042ad',
+  symbol: 'AAPL',
+  strategy_type: 'Test Strategy',
+  pattern: 'N/A',
+  entry_date: '2026-02-06T10:06:52.902Z',
+  entry_price: 150,
+  position_size: 10,
+  stop_loss: 140,
+  risk_percent: 1,
+  emotional_state_pre: 'Neutral',
+  reason_for_entry: 'Imported from MT5',
+  reviewed: false,
+  source: 'manual',
+  _id: '6985bd3d32dd618fa563dea6',
+  createdAt: '2026-02-06T10:06:53.067Z',
+  updatedAt: '2026-02-06T10:06:53.067Z',
+  __v: 0
+}
+
+--- 6. Trades - Verify List ---
+Ô£à Fetched 1 trades.
+
+­ƒÄë ALL TESTS PASSED!

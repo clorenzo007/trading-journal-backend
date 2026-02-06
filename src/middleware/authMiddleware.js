@@ -14,7 +14,8 @@ const protect = async (req, res, next) => {
     if (!user) return res.status(401).json({ error: "Not authorized" });
 
     // 🔥 clave: siempre req.user.id
-    req.user = { id: user._id.toString(), role: user.role, email: user.email };
+    req.user = user;
+    console.log("AUTH MIDDLEWARE USER:", req.user?._id);
 
     next();
   } catch (err) {
