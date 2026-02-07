@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "user"], // ✅ ACA VA ENUM
       default: "user",
     },
+    active: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true },
 );
