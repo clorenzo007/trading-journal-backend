@@ -43,6 +43,21 @@ router.patch("/users/:id/role", async (req, res) => {
   res.json(user);
 });
 
+// resetear contraseña (admin)
+router.patch("/users/:id/password", async (req, res) => {
+  const { password } = req.body;
+  if (!password || password.length < 6) {
+    return res.status(400).json({ error: "Password must be at least 6 characters" });
+  }
+
+  const user = await User.findById(req.params.id);
+  if (!user) return res.status(404).json({ error: "User not found" });
+
+  user.password = password; // pre-save hook will hash it
+  await user.save();
+  res.json({ message: "Password updated successfully" });
+});
+
 // eliminar usuario
 router.delete("/users/:id", async (req, res) => {
   if (req.params.id === req.user._id.toString()) {
