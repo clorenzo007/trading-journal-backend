@@ -9,6 +9,10 @@ import {
   getPatterns,
   createPattern,
   deletePattern,
+  deletePattern,
+  getListItems,
+  createListItem,
+  deleteListItem,
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -93,5 +97,12 @@ router.delete("/strategies/:id", deleteStrategy);
 router.get("/patterns", getPatterns);
 router.post("/patterns", createPattern);
 router.delete("/patterns/:id", deletePattern);
+
+// ==========================
+// LIST ITEMS (Emotions, Reasons)
+// ==========================
+router.get("/list-items/:type", getListItems);
+router.post("/list-items", createListItem);
+router.delete("/list-items/:id", deleteListItem);
 
 export default router;
