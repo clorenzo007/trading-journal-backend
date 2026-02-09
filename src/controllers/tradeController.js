@@ -107,3 +107,26 @@ export const deleteTrade = async (req, res) => {
     res.status(500).json({ error: "Failed to delete trade" });
   }
 };
+
+// =======================
+// BULK DELETE
+// =======================
+export const deleteTrades = async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: "No IDs provided" });
+    }
+
+    const result = await Trade.deleteMany({
+      _id: { $in: ids },
+      user: req.user._id,
+      account: req.account._id,
+    });
+
+    res.json({ success: true, count: result.deletedCount });
+  } catch (err) {
+    console.error("BULK DELETE TRADES ERROR:", err);
+    res.status(500).json({ error: "Failed to delete trades" });
+  }
+};
