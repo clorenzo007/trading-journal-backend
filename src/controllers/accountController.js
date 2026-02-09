@@ -31,6 +31,7 @@ export const createAccount = async (req, res) => {
     const account = await TradingAccount.create({
       userId: req.user.id,
       name,
+      accountType: req.body.accountType || "real",
       provider: req.body.provider,
       currency: req.body.currency || "USD",
       accountNumber: req.body.accountNumber,

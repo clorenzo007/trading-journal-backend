@@ -8,6 +8,12 @@ const tradingAccountSchema = new mongoose.Schema(
       required: true,
     },
 
+    accountType: {
+      type: String,
+      enum: ["real", "demo", "fondeo"],
+      default: "real",
+    },
+
     accountTypeId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "AccountType",
