@@ -5,6 +5,11 @@ import { requireAdmin } from "../middleware/admin.js";
 
 const router = express.Router();
 
+// ===========================================
+// GLOBAL MIDDLEWARE
+// 1. Authenticate user.
+// 2. Enforce Admin role.
+// ===========================================
 router.use(auth);
 router.use(requireAdmin);
 

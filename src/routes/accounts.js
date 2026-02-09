@@ -10,6 +10,11 @@ import {
 
 const router = express.Router();
 
+// ===========================================
+// ACCOUNT ROUTES
+// Base Path: /accounts
+// All routes protected by `protect` middleware.
+// ===========================================
 router.get("/", protect, getAccounts);
 router.post("/", protect, createAccount);
 router.put("/:id/activate", protect, activateAccount);

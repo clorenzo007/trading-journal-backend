@@ -12,7 +12,12 @@ import upload from "../middleware/upload.js";
 
 const router = express.Router();
 
-// 🔐 AUTH + ACCOUNT
+// ===========================================
+// UPLOAD ROUTES (TRADES)
+// Base Path: / (mounted at root)
+// Requires: Auth + Active Account
+// Note: These routes handle specific trade images.
+// ===========================================
 router.use(auth);
 router.use(requireActiveAccount);
 

@@ -8,7 +8,11 @@ const router = express.Router();
 
 router.use(auth);
 
-// Import requires an active account (resolved from x-account-id or current active)
+// ===========================================
+// IMPORT ROUTES
+// Base Path: /import
+// Requires: Auth + Active Account
+// ===========================================
 router.post("/mt5", requireActiveAccount, upload.single("file"), importMT5);
 
 export default router;

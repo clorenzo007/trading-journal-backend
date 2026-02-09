@@ -3,6 +3,9 @@ import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
+    // ===========================================
+    // USER CREDENTIALS
+    // ===========================================
     email: {
       type: String,
       required: true,
@@ -17,9 +20,12 @@ const userSchema = new mongoose.Schema(
       minlength: 6,
     },
 
+    // ===========================================
+    // PERMISSIONS & STATUS
+    // ===========================================
     role: {
       type: String,
-      enum: ["admin", "user"], // ✅ ACA VA ENUM
+      enum: ["admin", "user"],
       default: "user",
     },
     active: {
@@ -30,7 +36,10 @@ const userSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-// ================= HASH PASSWORD =================
+// =========================================================================
+// MIDDLEWARE: HASH PASSWORD
+// Automatically hashes the password before saving a new or modified user.
+// =========================================================================
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
@@ -39,7 +48,10 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-// ================= COMPARE PASSWORD =================
+// =========================================================================
+// METHOD: COMPARE PASSWORD
+// Compares a candidate password with the hashed password in the database.
+// =========================================================================
 userSchema.methods.comparePassword = function (candidate) {
   return bcrypt.compare(candidate, this.password);
 };

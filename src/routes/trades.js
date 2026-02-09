@@ -12,6 +12,11 @@ import {
 
 const router = express.Router();
 
+// ===========================================
+// TRADE ROUTES
+// Base Path: /trades
+// Requires: Auth + Active Account
+// ===========================================
 router.use(auth);
 router.use(requireActiveAccount);
 

@@ -3,6 +3,8 @@ import TradingAccount from "../models/TradingAccount.js";
 
 // =========================
 // GET ACCOUNTS
+// Fetches all trading accounts for the authenticated user.
+// Ordered by creation date (newest first).
 // =========================
 export const getAccounts = async (req, res) => {
   try {

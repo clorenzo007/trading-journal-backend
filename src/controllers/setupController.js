@@ -13,6 +13,8 @@ export const getSetups = async (req, res) => {
 };
 
 // ================= CREATE SETUP =================
+// Creates a new trading setup definition.
+// Handles optional image uploads for theory and example.
 export const createSetup = async (req, res) => {
   try {
     const setup = new Setup({

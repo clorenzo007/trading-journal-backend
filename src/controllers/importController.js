@@ -1,6 +1,11 @@
 import Trade from "../models/Trade.js";
 import { parseMT5File } from "../utils/mt5Parser.js";
 
+// =========================
+// IMPORT MT5 TRADES
+// Parses an uploaded file and creates trades in the active account.
+// Skips duplicates based on `external_id` (ticket number) within the same account.
+// =========================
 export const importMT5 = async (req, res) => {
   try {
     if (!req.file) {

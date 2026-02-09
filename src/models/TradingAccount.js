@@ -15,7 +15,7 @@ const tradingAccountSchema = new mongoose.Schema(
 
     name: { type: String, required: true, trim: true },
 
-    // 🔥 clave para evitar duplicados case/space-insensitive
+    // Key used to prevent duplicates (case-insensitive + trimmed)
     nameKey: { type: String, required: true, lowercase: true, trim: true },
 
     provider: String,
@@ -32,6 +32,10 @@ const tradingAccountSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+// =========================================================================
+// MIDDLEWARE: NORMALIZE NAME
+// Ensures name is trimmed and nameKey is generated before validation.
+// =========================================================================
 tradingAccountSchema.pre("validate", function (next) {
   if (this.name) {
     this.name = this.name.trim();
@@ -40,7 +44,7 @@ tradingAccountSchema.pre("validate", function (next) {
   next();
 });
 
-// 🔥 Evita duplicados por usuario + nombre normalizado
+// Prevent duplicate accounts for the same user (case-insensitive)
 tradingAccountSchema.index({ userId: 1, nameKey: 1 }, { unique: true });
 
 export default mongoose.model("TradingAccount", tradingAccountSchema);

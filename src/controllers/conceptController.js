@@ -1,7 +1,11 @@
 import cloudinary from "../config/cloudinary.js";
 import Concept from "../models/Concept.js";
 
-// GET ALL CONCEPTS FOR USER
+// =========================
+// GET ALL CONCEPTS
+// Fetches concepts for the authenticated user.
+// Ordered by manually set order (1) and then creation date (-1).
+// =========================
 export const getConcepts = async (req, res) => {
   try {
     const concepts = await Concept.find({ user: req.user._id }).sort({ order: 1, createdAt: -1 });

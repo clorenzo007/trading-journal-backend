@@ -1,6 +1,11 @@
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 
+/**
+ * Generates a JWT token for the authenticated user.
+ * Verified by `authMiddleware`.
+ * @param {string} id - User ID
+ */
 function generateToken(id) {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
 }

@@ -12,6 +12,11 @@ import upload from "../middleware/upload.js";
 
 const router = express.Router();
 
+// ===========================================
+// CONCEPT ROUTES
+// Base Path: /concepts
+// Protected by `authMiddleware`
+// ===========================================
 router.use(auth);
 
 router.get("/", getConcepts);

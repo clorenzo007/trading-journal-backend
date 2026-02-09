@@ -2,6 +2,8 @@ import Trade from "../models/Trade.js";
 import cloudinary from "../config/cloudinary.js";
 
 // ================= ENTRY IMAGE UPLOAD =================
+// Uploads an entry screenshot to Cloudinary ("trading-journal/entries").
+// Deletes previous image if it exists to keep storage clean.
 export const uploadEntryImage = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });

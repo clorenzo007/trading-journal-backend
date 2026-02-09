@@ -1,6 +1,14 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
+/**
+ * Middleware to protect routes.
+ * 
+ * 1. Checks for "Authorization: Bearer <token>" header.
+ * 2. Verifies the JWT token.
+ * 3. Fetches the user from the database (excluding password).
+ * 4. Attaches the user object to `req.user`.
+ */
 const protect = async (req, res, next) => {
   try {
     const auth = req.headers.authorization || "";
@@ -13,7 +21,7 @@ const protect = async (req, res, next) => {
     const user = await User.findById(decoded.id).select("-password");
     if (!user) return res.status(401).json({ error: "Not authorized" });
 
-    // 🔥 clave: siempre req.user.id
+    // Attach user to request object
     req.user = user;
     console.log("AUTH MIDDLEWARE USER:", req.user?._id);
 

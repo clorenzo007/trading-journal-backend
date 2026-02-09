@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 
 const TradeSchema = new mongoose.Schema(
   {
+    // ===========================================
+    // REFERENCES
+    // Linking trade to specific user and account
+    // ===========================================
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

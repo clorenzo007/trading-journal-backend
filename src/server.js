@@ -16,7 +16,11 @@ dotenv.config();
 
 const app = express();
 
-// ================= CORS FIRST (CRITICAL) =================
+// ===========================================
+// CORS CONFIGURATION (CRITICAL)
+// Allows requests from specific origins (Localhost, Vercel).
+// Handles dynamic localhost ports for development convenience.
+// ===========================================
 const allowedOrigins = [
   "http://localhost:5173",
   "https://trading-journal-livermore.vercel.app",
@@ -28,7 +32,7 @@ app.use(
     origin: function (origin, callback) {
       if (!origin) return callback(null, true);
       
-      // 🔥 Allow any localhost (dynamic ports like 5174, 5175, etc.)
+      // Allow any localhost (dynamic ports like 5174, 5175, etc.)
       if (origin.match(/^http:\/\/localhost:\d+$/)) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) return callback(null, true);

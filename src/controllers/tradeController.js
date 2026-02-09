@@ -1,7 +1,9 @@
 import Trade from "../models/Trade.js";
 
 // =======================
-// CREATE
+// CREATE TRADE
+// Creates a new trade for the authenticated user and active account.
+// Requires `req.account` to be set by `activeAccount` middleware.
 // =======================
 export const createTrade = async (req, res) => {
   console.log("CREATE TRADE CONTROLLER - User:", req.user?._id, "Account:", req.account?._id);
@@ -9,7 +11,7 @@ export const createTrade = async (req, res) => {
     const trade = await Trade.create({
       ...req.body,
       user: req.user._id,
-      account: req.account._id, // ✅ FIX
+      account: req.account._id, // Scoped to active account
     });
 
     res.status(201).json(trade);

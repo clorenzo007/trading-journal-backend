@@ -2,14 +2,21 @@ import * as XLSX from "xlsx";
 
 /**
  * Parses an MT5 report (CSV or XLSX) and returns an array of trade objects.
- * Handles duplicate column names (like Time, Price) by using index-based mapping.
+ * 
+ * The parser handles:
+ * - Duplicate column names (e.g. "Time" appears for Open and Close).
+ * - Various date formats and Excel serial dates.
+ * - Number formatting with different separators (comma vs dot).
+ * 
+ * @param {Buffer} buffer - The file buffer uploaded by the user.
+ * @returns {Array} Array of parsed trade objects.
  */
 export const parseMT5File = (buffer) => {
   const workbook = XLSX.read(buffer, { type: "buffer" });
   const sheetName = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[sheetName];
 
-  // Use header: 1 to get an array of arrays
+  // Convert sheet to JSON array of arrays (header: 1)
   const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
   // Find the header row (the one containing "Symbol" and either "Ticket" or "Position")

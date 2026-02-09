@@ -8,6 +8,7 @@ const ConceptSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    // The main title of the concept
     title: {
       type: String,
       required: true,
@@ -17,24 +18,29 @@ const ConceptSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    // Detailed explanation
     description: {
       type: String,
       trim: true,
     },
+    // List of key points or bullet items
     items: [
       {
         type: String,
         trim: true,
       },
     ],
+    // Additional notes
     note: {
       type: String,
       trim: true,
     },
+    // Visual reference
     image: {
       url: String,
       public_id: String,
     },
+    // Display order
     order: {
       type: Number,
       default: 0,

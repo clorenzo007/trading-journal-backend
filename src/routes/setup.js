@@ -12,6 +12,11 @@ import upload from "../middleware/upload.js";
 
 const router = express.Router();
 
+// ===========================================
+// SETUP ROUTES
+// Base Path: /setups
+// Protected by `authMiddleware`
+// ===========================================
 router.use(auth);
 
 router.get("/", getSetups);
