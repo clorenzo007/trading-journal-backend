@@ -2,6 +2,14 @@ import express from "express";
 import User from "../models/User.js";
 import auth from "../middleware/authMiddleware.js";
 import { requireAdmin } from "../middleware/admin.js";
+import {
+  getStrategies,
+  createStrategy,
+  deleteStrategy,
+  getPatterns,
+  createPattern,
+  deletePattern,
+} from "../controllers/adminController.js";
 
 const router = express.Router();
 
@@ -74,5 +82,16 @@ router.delete("/users/:id", async (req, res) => {
 
   res.json({ message: "User deleted successfully" });
 });
+
+// ==========================
+// STRATEGIES & PATTERNS
+// ==========================
+router.get("/strategies", getStrategies);
+router.post("/strategies", createStrategy);
+router.delete("/strategies/:id", deleteStrategy);
+
+router.get("/patterns", getPatterns);
+router.post("/patterns", createPattern);
+router.delete("/patterns/:id", deletePattern);
 
 export default router;

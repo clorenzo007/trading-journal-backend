@@ -36,6 +36,8 @@ export const createAccount = async (req, res) => {
       currency: req.body.currency || "USD",
       accountNumber: req.body.accountNumber,
       initialBalance: req.body.initialBalance || 0,
+      creationDate: req.body.creationDate,
+      meltingDate: req.body.meltingDate,
       status: count === 0 ? "active" : "inactive", // 🔥 clave
     });
 

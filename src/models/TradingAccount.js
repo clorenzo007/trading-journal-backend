@@ -28,6 +28,10 @@ const tradingAccountSchema = new mongoose.Schema(
     currency: { type: String, default: "USD" },
     accountNumber: String,
     initialBalance: { type: Number, default: 0 },
+    
+    // Dates
+    creationDate: { type: Date },
+    meltingDate: { type: Date },
 
     status: {
       type: String,

@@ -37,7 +37,14 @@ const TradeSchema = new mongoose.Schema(
     // ======================
     // ENTRADA
     // ======================
-    entry_date: { type: Date, required: true },
+    direction: {
+      type: String,
+      enum: ["Long", "Short"],
+      default: "Long",
+    },
+    
+    // Stored as STRING ISO 8601 (e.g. "2023-10-27T10:30") to preserve local time
+    entry_date: { type: String, required: true },
     entry_price: { type: Number, required: true },
     position_size: { type: Number, required: true },
 
@@ -50,7 +57,8 @@ const TradeSchema = new mongoose.Schema(
     // ======================
     // SALIDA
     // ======================
-    exit_date: { type: Date },
+    // Stored as STRING ISO 8601
+    exit_date: { type: String },
     exit_price: { type: Number },
     profit_loss: { type: Number },
     outcome: {
