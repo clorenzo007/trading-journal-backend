@@ -28,6 +28,9 @@ export const createAccount = async (req, res) => {
 
     const count = await TradingAccount.countDocuments({ userId: req.user.id });
 
+    const creationDate = req.body.creationDate ? new Date(req.body.creationDate) : undefined;
+    const meltingDate = req.body.meltingDate ? new Date(req.body.meltingDate) : undefined;
+
     const account = await TradingAccount.create({
       userId: req.user.id,
       name,
@@ -36,17 +39,18 @@ export const createAccount = async (req, res) => {
       currency: req.body.currency || "USD",
       accountNumber: req.body.accountNumber,
       initialBalance: req.body.initialBalance || 0,
-      creationDate: req.body.creationDate,
-      meltingDate: req.body.meltingDate,
+      creationDate,
+      meltingDate,
       status: count === 0 ? "active" : "inactive", // 🔥 clave
     });
 
     return res.json(account);
   } catch (err) {
+    console.error("CREATE ACCOUNT ERROR:", err);
     if (err?.code === 11000) {
       return res.status(400).json({ error: "Account already exists" });
     }
-    return res.status(500).json({ error: "Error creating account" });
+    return res.status(500).json({ error: err.message || "Error creating account" });
   }
 };
 
