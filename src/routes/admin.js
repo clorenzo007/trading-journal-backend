@@ -9,7 +9,6 @@ import {
   getPatterns,
   createPattern,
   deletePattern,
-  deletePattern,
   getListItems,
   createListItem,
   deleteListItem,
