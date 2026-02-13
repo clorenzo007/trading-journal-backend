@@ -65,13 +65,57 @@ export const createConcept = async (req, res) => {
 // UPDATE CONCEPT
 export const updateConcept = async (req, res) => {
   try {
-    const concept = await Concept.findOneAndUpdate(
-      { _id: req.params.id, user: req.user._id },
-      req.body,
+    let conceptData = { ...req.body };
+
+    // Handle items parsing if sent as string (FormData)
+    if (typeof conceptData.items === 'string') {
+      try {
+        conceptData.items = JSON.parse(conceptData.items);
+      } catch (e) {
+        conceptData.items = [conceptData.items];
+      }
+    }
+
+    // Find original concept to check for existing image
+    const originalConcept = await Concept.findOne({ _id: req.params.id, user: req.user._id });
+    if (!originalConcept) return res.status(404).json({ error: "Concept not found" });
+
+    // Handle File Upload
+    if (req.file) {
+      // 1. Delete old image if exists
+      if (originalConcept.image?.public_id) {
+        try {
+          await cloudinary.uploader.destroy(originalConcept.image.public_id);
+        } catch (err) {
+          console.error("Failed to delete old image:", err);
+        }
+      }
+
+      // 2. Upload new image
+      const result = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder: "concepts" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          },
+        );
+        uploadStream.end(req.file.buffer);
+      });
+
+      conceptData.image = {
+        url: result.secure_url,
+        public_id: result.public_id,
+      };
+    }
+
+    const updatedConcept = await Concept.findByIdAndUpdate(
+      req.params.id,
+      conceptData,
       { new: true }
     );
-    if (!concept) return res.status(404).json({ error: "Concept not found" });
-    res.json(concept);
+
+    res.json(updatedConcept);
   } catch (err) {
     console.error("UPDATE CONCEPT ERROR:", err);
     res.status(400).json({ error: err.message });

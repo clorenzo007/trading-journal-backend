@@ -22,7 +22,8 @@ router.use(auth);
 router.get("/", getConcepts);
 router.post("/", upload.single("file"), createConcept);
 router.put("/order", updateConceptsOrder);
-router.put("/:id", updateConcept);
+// Update concept (now supports file upload)
+router.put("/:id", upload.single("file"), updateConcept);
 router.delete("/:id", deleteConcept);
 
 // Upload images
