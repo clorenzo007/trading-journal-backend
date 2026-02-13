@@ -22,9 +22,10 @@ export const createConcept = async (req, res) => {
     const conceptData = {
       ...req.body,
       user: req.user._id,
+      images: [], 
     };
 
-    // Handle files if items is an array of strings in body it might need parsing if it was sent as stringified json in multipart
+    // Handle files if items is an array of strings in body it might need parsing
     if (typeof conceptData.items === 'string') {
       try {
         conceptData.items = JSON.parse(conceptData.items);
@@ -33,27 +34,35 @@ export const createConcept = async (req, res) => {
       }
     }
 
-    const concept = new Concept(conceptData);
-
-    // If file is provided during creation
-    if (req.file) {
-      const result = await new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-          { folder: "concepts" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          },
-        );
-        uploadStream.end(req.file.buffer);
+    // Handle Multiple Files
+    if (req.files && req.files.length > 0) {
+      const uploadPromises = req.files.map(file => {
+        return new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { folder: "concepts" },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve({
+                url: result.secure_url,
+                public_id: result.public_id
+              });
+            }
+          );
+          uploadStream.end(file.buffer);
+        });
       });
 
-      concept.image = {
-        url: result.secure_url,
-        public_id: result.public_id,
-      };
+      const uploadedImages = await Promise.all(uploadPromises);
+      conceptData.images = uploadedImages;
+      
+      // Set the first image as the main "image" for backward compatibility if needed, 
+      // or just rely on images array. Let's populate legacy field just in case.
+      if (uploadedImages.length > 0) {
+        conceptData.image = uploadedImages[0];
+      }
     }
 
+    const concept = new Concept(conceptData);
     await concept.save();
     res.status(201).json(concept);
   } catch (err) {
@@ -67,7 +76,7 @@ export const updateConcept = async (req, res) => {
   try {
     let conceptData = { ...req.body };
 
-    // Handle items parsing if sent as string (FormData)
+    // Handle items parsing
     if (typeof conceptData.items === 'string') {
       try {
         conceptData.items = JSON.parse(conceptData.items);
@@ -76,37 +85,46 @@ export const updateConcept = async (req, res) => {
       }
     }
 
-    // Find original concept to check for existing image
     const originalConcept = await Concept.findOne({ _id: req.params.id, user: req.user._id });
     if (!originalConcept) return res.status(404).json({ error: "Concept not found" });
 
-    // Handle File Upload
-    if (req.file) {
-      // 1. Delete old image if exists
-      if (originalConcept.image?.public_id) {
-        try {
-          await cloudinary.uploader.destroy(originalConcept.image.public_id);
-        } catch (err) {
-          console.error("Failed to delete old image:", err);
-        }
-      }
-
-      // 2. Upload new image
-      const result = await new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-          { folder: "concepts" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          },
-        );
-        uploadStream.end(req.file.buffer);
+    // Handle New Files (Append)
+    if (req.files && req.files.length > 0) {
+      const uploadPromises = req.files.map(file => {
+        return new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { folder: "concepts" },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve({
+                url: result.secure_url,
+                public_id: result.public_id
+              });
+            }
+          );
+          uploadStream.end(file.buffer);
+        });
       });
 
-      conceptData.image = {
-        url: result.secure_url,
-        public_id: result.public_id,
-      };
+      const newImages = await Promise.all(uploadPromises);
+      
+      // Initialize images array if it doesn't exist (migration from legacy)
+      let currentImages = originalConcept.images || [];
+      
+      // If images array is empty but legacy image exists, push it
+      if (currentImages.length === 0 && originalConcept.image?.url) {
+        currentImages.push(originalConcept.image);
+      }
+
+      // Combine
+      conceptData.images = [...currentImages, ...newImages];
+      
+      // Update legacy field to latest or first? 
+      // Let's keep legacy field as the *first* image, or user defined?
+      // For now, just keep it in sync with the first image.
+      if (conceptData.images.length > 0) {
+        conceptData.image = conceptData.images[0];
+      }
     }
 
     const updatedConcept = await Concept.findByIdAndUpdate(
@@ -128,13 +146,20 @@ export const deleteConcept = async (req, res) => {
     const concept = await Concept.findOne({ _id: req.params.id, user: req.user._id });
     if (!concept) return res.status(404).json({ error: "Concept not found" });
 
-    // Delete image from Cloudinary if it exists
-    if (concept.image?.public_id) {
-      try {
-        await cloudinary.uploader.destroy(concept.image.public_id);
-      } catch (err) {
-        console.error("DELETE CONCEPT IMAGE ERROR:", err);
-      }
+    // Collect all public_ids to delete
+    const publicIds = [];
+    if (concept.images && concept.images.length > 0) {
+      concept.images.forEach(img => {
+        if (img.public_id) publicIds.push(img.public_id);
+      });
+    } else if (concept.image?.public_id) {
+      publicIds.push(concept.image.public_id);
+    }
+
+    // Delete from Cloudinary
+    if (publicIds.length > 0) {
+      const deletePromises = publicIds.map(id => cloudinary.uploader.destroy(id));
+      await Promise.all(deletePromises);
     }
 
     await Concept.deleteOne({ _id: req.params.id });

@@ -20,13 +20,13 @@ const router = express.Router();
 router.use(auth);
 
 router.get("/", getConcepts);
-router.post("/", upload.single("file"), createConcept);
+router.post("/", upload.array("files", 10), createConcept);
 router.put("/order", updateConceptsOrder);
-// Update concept (now supports file upload)
-router.put("/:id", upload.single("file"), updateConcept);
+// Update concept (now supports multiple file uploads)
+router.put("/:id", upload.array("files", 10), updateConcept);
 router.delete("/:id", deleteConcept);
 
-// Upload images
-router.post("/:id/image", upload.single("file"), uploadConceptImage);
+// Upload images (append to existing)
+router.post("/:id/image", upload.array("files", 10), uploadConceptImage);
 
 export default router;

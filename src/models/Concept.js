@@ -35,11 +35,18 @@ const ConceptSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    // Visual reference
+    // Visual reference (Legacy support)
     image: {
       url: String,
       public_id: String,
     },
+    // Multiple images
+    images: [
+      {
+        url: String,
+        public_id: String,
+      }
+    ],
     // Display order
     order: {
       type: Number,
