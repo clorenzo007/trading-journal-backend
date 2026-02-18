@@ -51,8 +51,13 @@ const TradeSchema = new mongoose.Schema(
     // ======================
     // RIESGO
     // ======================
+    // ======================
+    // RIESGO
+    // ======================
     stop_loss: { type: Number, required: true },
+    take_profit: { type: Number }, // ✅ NEW
     risk_percent: { type: Number, required: true },
+    highest_lowest_price: { type: Number }, // ✅ NEW: Price reached during trade
 
     // ======================
     // SALIDA
