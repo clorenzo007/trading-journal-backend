@@ -35,6 +35,11 @@ app.use(
       // Allow any localhost (dynamic ports like 5174, 5175, etc.)
       if (origin.match(/^http:\/\/localhost:\d+$/)) return callback(null, true);
 
+      // Allow Vercel deployment URLs (production and previews)
+      if (origin.startsWith("https://trading-journal-livermore") && origin.endsWith(".vercel.app")) {
+        return callback(null, true);
+      }
+
       if (allowedOrigins.includes(origin)) return callback(null, true);
       return callback(new Error("Not allowed by CORS"));
     },
