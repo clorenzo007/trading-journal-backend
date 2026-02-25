@@ -56,6 +56,7 @@ const TradeSchema = new mongoose.Schema(
     // ======================
     stop_loss: { type: Number, required: true },
     take_profit: { type: Number }, // ✅ NEW
+    rr_ratio: { type: Number }, // ✅ NEW: Risk/Reward auto-calculated
     risk_percent: { type: Number, required: true },
     highest_lowest_price: { type: Number }, // ✅ NEW: Price reached during trade
 
