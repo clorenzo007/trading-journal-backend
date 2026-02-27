@@ -1,5 +1,6 @@
 import express from "express";
 import auth from "../middleware/authMiddleware.js";
+import { requireAdmin } from "../middleware/admin.js";
 import {
   getSetups,
   createSetup,
@@ -19,20 +20,24 @@ const router = express.Router();
 // ===========================================
 router.use(auth);
 
+// Publicly visible to all authenticated users
 router.get("/", getSetups);
+
+// Admin-only operations
 router.post(
   "/",
+  requireAdmin,
   upload.fields([
     { name: "theoryImage", maxCount: 1 },
     { name: "exampleImage", maxCount: 1 },
   ]),
   createSetup
 );
-router.put("/order", updateSetupsOrder);
-router.put("/:id", updateSetup);
-router.delete("/:id", deleteSetup);
+router.put("/order", requireAdmin, updateSetupsOrder);
+router.put("/:id", requireAdmin, updateSetup);
+router.delete("/:id", requireAdmin, deleteSetup);
 
 // Upload images
-router.post("/:id/image/:field", upload.single("file"), uploadSetupImage);
+router.post("/:id/image/:field", requireAdmin, upload.single("file"), uploadSetupImage);
 
 export default router;

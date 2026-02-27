@@ -2,13 +2,13 @@ import cloudinary from "../config/cloudinary.js";
 import Concept from "../models/Concept.js";
 
 // =========================
-// GET ALL CONCEPTS
-// Fetches concepts for the authenticated user.
+// GET ALL CONCEPTS (GLOBAL)
+// Fetches all concepts for any authenticated user.
 // Ordered by manually set order (1) and then creation date (-1).
 // =========================
 export const getConcepts = async (req, res) => {
   try {
-    const concepts = await Concept.find({ user: req.user._id }).sort({ order: 1, createdAt: -1 });
+    const concepts = await Concept.find({}).sort({ order: 1, createdAt: -1 });
     res.json(concepts);
   } catch (err) {
     console.error("GET CONCEPTS ERROR:", err);
@@ -85,7 +85,7 @@ export const updateConcept = async (req, res) => {
       }
     }
 
-    const originalConcept = await Concept.findOne({ _id: req.params.id, user: req.user._id });
+    const originalConcept = await Concept.findOne({ _id: req.params.id });
     if (!originalConcept) return res.status(404).json({ error: "Concept not found" });
 
     // Handle New Files (Append)
@@ -143,7 +143,7 @@ export const updateConcept = async (req, res) => {
 // DELETE CONCEPT
 export const deleteConcept = async (req, res) => {
   try {
-    const concept = await Concept.findOne({ _id: req.params.id, user: req.user._id });
+    const concept = await Concept.findOne({ _id: req.params.id });
     if (!concept) return res.status(404).json({ error: "Concept not found" });
 
     // Collect all public_ids to delete
@@ -173,7 +173,7 @@ export const deleteConcept = async (req, res) => {
 // UPLOAD CONCEPT IMAGE
 export const uploadConceptImage = async (req, res) => {
   try {
-    const concept = await Concept.findOne({ _id: req.params.id, user: req.user._id });
+    const concept = await Concept.findOne({ _id: req.params.id });
     if (!concept) return res.status(404).json({ error: "Concept not found" });
 
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
@@ -216,7 +216,7 @@ export const updateConceptsOrder = async (req, res) => {
   try {
     const { orders } = req.body; // Array of { id, order }
     const promises = orders.map(({ id, order }) =>
-      Concept.findOneAndUpdate({ _id: id, user: req.user._id }, { order })
+      Concept.findOneAndUpdate({ _id: id }, { order })
     );
     await Promise.all(promises);
     res.json({ success: true });

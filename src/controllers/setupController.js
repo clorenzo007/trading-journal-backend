@@ -1,10 +1,10 @@
 import Setup from "../models/Setup.js";
 import cloudinary from "../config/cloudinary.js";
 
-// ================= GET ALL SETUPS (USER SCOPED) =================
+// ================= GET ALL SETUPS (GLOBAL) =================
 export const getSetups = async (req, res) => {
   try {
-    const setups = await Setup.find({ user: req.user._id }).sort({ order: 1, createdAt: -1 });
+    const setups = await Setup.find({}).sort({ order: 1, createdAt: -1 });
     res.json(setups);
   } catch (err) {
     console.error("GET SETUPS ERROR:", err);
@@ -67,7 +67,7 @@ export const createSetup = async (req, res) => {
 export const updateSetup = async (req, res) => {
   try {
     const setup = await Setup.findOneAndUpdate(
-      { _id: req.params.id, user: req.user._id },
+      { _id: req.params.id },
       req.body,
       { new: true }
     );
@@ -82,7 +82,7 @@ export const updateSetup = async (req, res) => {
 // ================= DELETE SETUP =================
 export const deleteSetup = async (req, res) => {
   try {
-    const setup = await Setup.findOne({ _id: req.params.id, user: req.user._id });
+    const setup = await Setup.findOne({ _id: req.params.id });
     if (!setup) return res.status(404).json({ error: "Setup not found" });
 
     // Delete images from Cloudinary if they exist
@@ -116,7 +116,7 @@ export const uploadSetupImage = async (req, res) => {
       async (error, uploaded) => {
         if (error) return res.status(500).json({ error: "Cloudinary error" });
 
-        const setup = await Setup.findOne({ _id: req.params.id, user: req.user._id });
+        const setup = await Setup.findOne({ _id: req.params.id });
         if (!setup) return res.status(404).json({ error: "Setup not found" });
 
         const imageField = field === "theory" ? "theoryImage" : "exampleImage";
@@ -152,7 +152,7 @@ export const updateSetupsOrder = async (req, res) => {
   try {
     const { orders } = req.body; // Array of { id, order }
     const promises = orders.map(({ id, order }) =>
-      Setup.findOneAndUpdate({ _id: id, user: req.user._id }, { order })
+      Setup.findOneAndUpdate({ _id: id }, { order })
     );
     await Promise.all(promises);
     res.json({ success: true });

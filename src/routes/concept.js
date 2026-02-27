@@ -1,5 +1,6 @@
 import express from "express";
 import auth from "../middleware/authMiddleware.js";
+import { requireAdmin } from "../middleware/admin.js";
 import {
   getConcepts,
   createConcept,
@@ -20,13 +21,14 @@ const router = express.Router();
 router.use(auth);
 
 router.get("/", getConcepts);
-router.post("/", upload.array("files", 10), createConcept);
-router.put("/order", updateConceptsOrder);
-// Update concept (now supports multiple file uploads)
-router.put("/:id", upload.array("files", 10), updateConcept);
-router.delete("/:id", deleteConcept);
+
+// Admin-only operations
+router.post("/", requireAdmin, upload.array("files", 10), createConcept);
+router.put("/order", requireAdmin, updateConceptsOrder);
+router.put("/:id", requireAdmin, upload.array("files", 10), updateConcept);
+router.delete("/:id", requireAdmin, deleteConcept);
 
 // Upload images (append to existing)
-router.post("/:id/image", upload.array("files", 10), uploadConceptImage);
+router.post("/:id/image", requireAdmin, upload.array("files", 10), uploadConceptImage);
 
 export default router;
