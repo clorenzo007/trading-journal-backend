@@ -31,7 +31,7 @@ export const register = async (req, res) => {
     const user = await User.create({
       email,
       password,
-      role: "admin",
+      // role will default to "user" per the model definition
     });
 
     return res.json({

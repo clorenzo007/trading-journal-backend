@@ -102,6 +102,9 @@ export const updateAccount = async (req, res) => {
     const updates = { ...req.body };
     if (typeof updates.name === "string") updates.name = updates.name.trim();
 
+    if (updates.creationDate === "") updates.creationDate = null;
+    if (updates.meltingDate === "") updates.meltingDate = null;
+
     const updated = await TradingAccount.findOneAndUpdate(
       { _id: id, userId: req.user.id },
       { $set: updates },
