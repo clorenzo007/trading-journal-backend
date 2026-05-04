@@ -11,6 +11,7 @@ import uploadRoutes from "./routes/upload.js";
 import adminRoutes from "./routes/admin.js";
 import setupRoutes from "./routes/setup.js";
 import conceptRoutes from "./routes/concept.js";
+import mongoose from "mongoose";
 
 dotenv.config();
 
@@ -66,7 +67,10 @@ app.use((req, res, next) => {
 
 // ================= HEALTH =================
 app.get("/", (req, res) => {
-  res.json({ status: "API running" });
+  res.json({ status: "API running", dbState: mongoose.connection.readyState });
+});
+app.get("/status", (req, res) => {
+  res.json({ status: "API running", dbState: mongoose.connection.readyState });
 });
 
 // ================= ROUTES =================
