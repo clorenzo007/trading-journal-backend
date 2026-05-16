@@ -11,7 +11,10 @@ import {
   deletePattern,
   getListItems,
   createListItem,
+  updateListItem,
   deleteListItem,
+  updateStrategy,
+  updatePattern,
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -91,10 +94,12 @@ router.delete("/users/:id", async (req, res) => {
 // ==========================
 router.get("/strategies", getStrategies);
 router.post("/strategies", createStrategy);
+router.put("/strategies/:id", updateStrategy);
 router.delete("/strategies/:id", deleteStrategy);
 
 router.get("/patterns", getPatterns);
 router.post("/patterns", createPattern);
+router.put("/patterns/:id", updatePattern);
 router.delete("/patterns/:id", deletePattern);
 
 // ==========================
@@ -102,6 +107,7 @@ router.delete("/patterns/:id", deletePattern);
 // ==========================
 router.get("/list-items/:type", getListItems);
 router.post("/list-items", createListItem);
+router.put("/list-items/:id", updateListItem);
 router.delete("/list-items/:id", deleteListItem);
 
 export default router;

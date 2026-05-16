@@ -42,6 +42,23 @@ export const deleteStrategy = async (req, res) => {
   }
 };
 
+export const updateStrategy = async (req, res) => {
+  try {
+    const { title } = req.body;
+    const item = await Strategy.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id },
+      { title },
+      { new: true }
+    );
+    if (!item) return res.status(404).json({ error: "Strategy not found" });
+    res.json(item);
+  } catch (err) {
+    if (err.code === 11000) return res.status(400).json({ error: "Strategy already exists" });
+    res.status(500).json({ error: "Failed to update strategy" });
+  }
+};
+
+
 export const updateSetupsOrder = async (req, res) => {
   try {
     const { orders } = req.body; // Array of { id, order }
@@ -103,6 +120,23 @@ export const deleteListItem = async (req, res) => {
   }
 };
 
+export const updateListItem = async (req, res) => {
+  try {
+    const { value } = req.body;
+    const item = await ListItem.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id },
+      { value },
+      { new: true }
+    );
+    if (!item) return res.status(404).json({ error: "Item not found" });
+    res.json(item);
+  } catch (err) {
+    if (err.code === 11000) return res.status(400).json({ error: "Item already exists" });
+    res.status(500).json({ error: "Failed to update list item" });
+  }
+};
+
+
 // ==========================
 // PATTERNS
 // ==========================
@@ -140,3 +174,20 @@ export const deletePattern = async (req, res) => {
     res.status(500).json({ error: "Failed to delete pattern" });
   }
 };
+
+export const updatePattern = async (req, res) => {
+  try {
+    const { title } = req.body;
+    const item = await Pattern.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id },
+      { title },
+      { new: true }
+    );
+    if (!item) return res.status(404).json({ error: "Pattern not found" });
+    res.json(item);
+  } catch (err) {
+    if (err.code === 11000) return res.status(400).json({ error: "Pattern already exists" });
+    res.status(500).json({ error: "Failed to update pattern" });
+  }
+};
+
