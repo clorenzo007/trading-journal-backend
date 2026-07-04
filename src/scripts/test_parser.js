@@ -1,27 +1,33 @@
 import { parseMT5File } from "../utils/mt5Parser.js";
-import fs from "fs";
+import * as XLSX from "xlsx";
 
-// Mock MT5 CSV data
-const csvContent = `Ticket,Open Time,Type,Size,Symbol,Open Price,S / L,T / P,Close Time,Close Price,Commission,Swap,Profit,Comment
-50123456,2024.01.01 10:00:00,buy,0.10,EURUSD,1.10000,1.09500,1.11000,2024.01.01 12:00:00,1.10500,0.00,0.00,50.00,Test trade
-50123457,2024.01.02 14:30:00,sell,0.20,GBPUSD,1.25000,1.25500,1.24000,2024.01.02 16:00:00,1.25200,0.00,0.00,-40.00,Another test`;
+// 1. Create a mock workbook for the NEW spreadsheet format
+const newFormatData = [
+  ["Symbol", "Type", "Open Date", "Open", "Closed Date", "Closed", "TP", "SL", "Lots", "Commi", "Profit"],
+  ["NDX100", "Buy", "7/2/2026, 10:45", 29885.05, "7/2/2026, 10:51", 29963.58, 29985.49, 29914.03, 0.05, 0.00, 78.53],
+  ["NDX100", "Sell", "7/1/2026, 12:20", 30059.00, "7/1/2026, 12:25", 30036.51, 30137.92, 30014.08, 0.05, 0.00, -22.24],
+];
 
-const buffer = Buffer.from(csvContent);
+const wsNew = XLSX.utils.aoa_to_sheet(newFormatData);
+const wbNew = XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wbNew, wsNew, "Sheet1");
+const bufferNew = XLSX.write(wbNew, { type: "buffer", bookType: "xlsx" });
 
-try {
-  const trades = parseMT5File(buffer);
-  console.log("Parsed Trades:", JSON.stringify(trades, null, 2));
-  
-  if (trades.length === 2) {
-    console.log("✅ Success: Parsed 2 trades.");
-    if (trades[0].symbol === "EURUSD" && trades[0].profit_loss === 50) {
-      console.log("✅ Data mapping looks correct.");
-    } else {
-      console.error("❌ Data mapping error.");
-    }
-  } else {
-    console.error(`❌ Expected 2 trades, got ${trades.length}`);
-  }
-} catch (err) {
-  console.error("Error during parsing:", err);
-}
+// 2. Create a mock workbook for the CLASSIC MT5 format
+const classicFormatData = [
+  ["Deal", "Symbol", "Type", "Volume", "Time", "Price", "S / L", "T / P", "Time", "Price", "Profit"],
+  ["123456", "EURUSD", "buy", 0.1, "2026.07.01 10:00:00", 1.0850, 1.0800, 1.0900, "2026.07.01 10:15:00", 1.0880, 30.00]
+];
+
+const wsClassic = XLSX.utils.aoa_to_sheet(classicFormatData);
+const wbClassic = XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wbClassic, wsClassic, "Sheet1");
+const bufferClassic = XLSX.write(wbClassic, { type: "buffer", bookType: "xlsx" });
+
+console.log("=== Testing NEW Spreadsheet Format ===");
+const newResult = parseMT5File(bufferNew);
+console.log(JSON.stringify(newResult, null, 2));
+
+console.log("\n=== Testing CLASSIC MT5 Format ===");
+const classicResult = parseMT5File(bufferClassic);
+console.log(JSON.stringify(classicResult, null, 2));

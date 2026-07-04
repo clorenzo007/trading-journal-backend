@@ -45,10 +45,12 @@ export const importMT5 = async (req, res) => {
           account: account._id,
 
           symbol: row.symbol,
+          direction: row.direction, // Save direction (Long/Short)
           entry_date: row.entry_date,
           entry_price: row.entry_price,
           position_size: row.position_size,
           stop_loss: row.stop_loss,
+          take_profit: row.take_profit, // Save take_profit
           risk_percent: row.risk_percent || 0,
 
           exit_date: row.exit_date,
