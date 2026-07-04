@@ -54,7 +54,13 @@ tradingAccountSchema.pre("validate", function (next) {
   next();
 });
 
-// Prevent duplicate accounts for the same user (case-insensitive)
-tradingAccountSchema.index({ userId: 1, nameKey: 1 }, { unique: true });
+// Prevent duplicate active/inactive accounts for the same user (case-insensitive)
+tradingAccountSchema.index(
+  { userId: 1, nameKey: 1 },
+  { 
+    unique: true,
+    partialFilterExpression: { status: { $ne: "archived" } }
+  }
+);
 
 export default mongoose.model("TradingAccount", tradingAccountSchema);
