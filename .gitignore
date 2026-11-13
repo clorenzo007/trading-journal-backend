@@ -1,3 +1,5 @@
 
 node_modules
 .env
+# Copias locales de la base (datos de usuarios y trades): nunca subir
+backup/
