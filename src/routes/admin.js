@@ -34,6 +34,35 @@ router.get("/users", async (req, res) => {
   res.json(users);
 });
 
+// crear usuario (admin)
+router.post("/users", async (req, res) => {
+  try {
+    const email = String(req.body.email || "").trim().toLowerCase();
+    const password = String(req.body.password || "");
+    const role = req.body.role || "user";
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: "Invalid email" });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+    if (!["admin", "user"].includes(role)) {
+      return res.status(400).json({ error: "Invalid role" });
+    }
+
+    const exists = await User.findOne({ email });
+    if (exists) return res.status(409).json({ error: "User already exists" });
+
+    const user = await User.create({ email, password, role }); // pre-save hook hashes password
+    const { password: _omit, ...safe } = user.toObject();
+    res.status(201).json(safe);
+  } catch (err) {
+    console.error("CREATE USER ERROR:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // activar / desactivar
 router.patch("/users/:id/toggle", async (req, res) => {
   if (req.params.id === req.user._id.toString()) {
