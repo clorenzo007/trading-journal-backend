@@ -20,10 +20,12 @@ const protect = async (req, res, next) => {
 
     const user = await User.findById(decoded.id).select("-password");
     if (!user) return res.status(401).json({ error: "Not authorized" });
+    if (user.active === false) {
+      return res.status(403).json({ error: "User disabled" });
+    }
 
     // Attach user to request object
     req.user = user;
-    console.log("AUTH MIDDLEWARE USER:", req.user?._id);
 
     next();
   } catch (err) {
