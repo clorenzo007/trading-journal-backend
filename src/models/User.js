@@ -32,6 +32,27 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    // ===========================================
+    // EMAIL VERIFICATION
+    // Existing users (created before this field existed) read as verified
+    // by default; only accounts created through register() are marked
+    // unverified and must confirm the code sent to their email.
+    // ===========================================
+    emailVerified: {
+      type: Boolean,
+      default: true,
+    },
+    verificationCode: {
+      type: String,
+      default: null,
+      select: false,
+    },
+    verificationCodeExpires: {
+      type: Date,
+      default: null,
+      select: false,
+    },
   },
   { timestamps: true },
 );
