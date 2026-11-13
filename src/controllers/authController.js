@@ -64,6 +64,10 @@ export const login = async (req, res) => {
     const ok = await user.comparePassword(password);
     if (!ok) return res.status(400).json({ error: "Invalid credentials" });
 
+    if (user.active === false) {
+      return res.status(403).json({ error: "Tu usuario está desactivado. Contactá al administrador." });
+    }
+
     return res.json({
       token: generateToken(user._id),
       user: { _id: user._id, email: user.email, role: user.role },
