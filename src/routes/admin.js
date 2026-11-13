@@ -21,11 +21,12 @@ const router = express.Router();
 
 // ===========================================
 // GLOBAL MIDDLEWARE
-// 1. Authenticate user.
-// 2. Enforce Admin role.
+// Todas las rutas requieren usuario autenticado.
+// Solo la gestión de usuarios (/users) requiere rol admin; strategies, patterns
+// y list-items son datos propios de cada usuario (filtrados por req.user._id).
 // ===========================================
 router.use(auth);
-router.use(requireAdmin);
+router.use("/users", requireAdmin);
 
 // listar usuarios
 router.get("/users", async (req, res) => {
